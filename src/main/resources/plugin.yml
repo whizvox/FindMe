@@ -1,0 +1,10 @@
+name: FindMe
+version: '${version}'
+main: me.whizvox.findme.FindMe
+api-version: '1.20'
+author: whizvox
+commands:
+  findme:
+    description: The main command used by FindMe
+    usage: To see a list of sub-commands, run /findme help
+    aliases: fm
