@@ -5,7 +5,6 @@ import me.whizvox.findme.command.ArgumentHelper;
 import me.whizvox.findme.command.CommandContext;
 import me.whizvox.findme.command.CommandHandler;
 import me.whizvox.findme.core.FMStrings;
-import me.whizvox.findme.core.collection.CollectionDbo;
 import me.whizvox.findme.core.findable.FindableDbo;
 import me.whizvox.findme.exception.InterruptCommandException;
 import org.bukkit.Bukkit;
@@ -45,7 +44,7 @@ public class RemoveCommandHandler extends CommandHandler {
     FindMe.inst().getFindables().getRepo().deleteById(id);
     FindableDbo findable = findableOp.get();
     String collectionName = FindMe.inst().getCollections().getCollection(findable.collectionId())
-        .map(CollectionDbo::displayName)
+        .map(col -> col.displayName)
         .orElse(ChatColor.RED + "???");
     if (findable.isBlock()) {
       World world = Bukkit.getWorld(findable.uuid());

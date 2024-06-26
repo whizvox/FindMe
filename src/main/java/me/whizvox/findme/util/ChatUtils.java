@@ -4,6 +4,10 @@ import org.bukkit.ChatColor;
 
 public class ChatUtils {
 
+  public static String colorString(String str) {
+    return ChatColor.translateAlternateColorCodes('&', str);
+  }
+
   public static String colorUsage(String args) {
     StringBuilder sb = new StringBuilder();
     for (char c : args.toCharArray()) {

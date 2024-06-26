@@ -12,6 +12,7 @@ public class FindMePlayerListeners implements Listener {
 
   @EventHandler
   public void onPlayerClick(PlayerInteractEvent event) {
+
     Location location = event.getClickedBlock().getLocation();
     Findable<Block> block = FindMe.inst().getFindables().getBlock(location);
     if (!block.isEmpty()) {

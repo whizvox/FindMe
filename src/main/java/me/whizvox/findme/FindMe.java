@@ -13,8 +13,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -29,6 +27,7 @@ public final class FindMe extends JavaPlugin {
   private LocalizationManager l10n;
 
   private File stringsFile;
+  private File collectionsFile;
 
   public FindMe() {
     instance = this;
@@ -62,24 +61,51 @@ public final class FindMe extends JavaPlugin {
   }
 
   private void loadOtherConfigurations() {
-    boolean loadFile = stringsFile.exists();
+    boolean loadStrings = stringsFile.exists();
     FileConfiguration stringsConfig = YamlConfiguration.loadConfiguration(stringsFile);
-    if (loadFile) {
+    if (loadStrings) {
       l10n.read(stringsConfig);
+      getLogger().info("Strings loaded");
     } else {
       FMStrings.getDefaults().forEach(stringsConfig::set);
       l10n.read(stringsConfig);
       try {
         stringsConfig.save(stringsFile);
+        getLogger().info("Loaded and saved default strings");
       } catch (IOException e) {
         getLogger().log(Level.WARNING, "Could not save strings configuration", e);
       }
+    }
+    boolean loadCollections = collectionsFile.exists();
+    FileConfiguration collectionsConfig = YamlConfiguration.loadConfiguration(collectionsFile);
+    collections.load(collectionsConfig);
+    if (loadCollections) {
+      getLogger().info("Collections loaded");
+    } else {
+      collections.save(collectionsConfig);
+      try {
+        collectionsConfig.save(collectionsFile);
+      } catch (IOException e) {
+        getLogger().log(Level.WARNING, "Could not generate default collections config", e);
+      }
+      getLogger().info("Created default collection");
     }
   }
 
   public void reloadPlugin() {
     reloadConfig();
     loadOtherConfigurations();
+  }
+
+  public void saveCollections() {
+    FileConfiguration collectionsConfig = new YamlConfiguration();
+    collections.save(collectionsConfig);
+    try {
+      collectionsConfig.save(collectionsFile);
+      getLogger().fine("Collections saved");
+    } catch (IOException e) {
+      getLogger().log(Level.WARNING, "Could not save collections file", e);
+    }
   }
 
   @Override
@@ -93,11 +119,12 @@ public final class FindMe extends JavaPlugin {
       getPluginLoader().disablePlugin(this);
       return;
     }
-    collections = new CollectionManager(conn);
+    collections = new CollectionManager();
     findables = new FindableManager(conn);
     foundItems = new FoundItemManager(conn);
     l10n = new LocalizationManager();
     stringsFile = new File(getDataFolder(), "strings.yml");
+    collectionsFile = new File(getDataFolder(), "collections.yml");
     loadOtherConfigurations();
 
     FindMeCommandDelegator commandDelegator = new FindMeCommandDelegator();

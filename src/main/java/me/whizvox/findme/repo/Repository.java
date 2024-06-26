@@ -1,6 +1,5 @@
 package me.whizvox.findme.repo;
 
-import me.whizvox.findme.FindMe;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.*;

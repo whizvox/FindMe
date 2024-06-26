@@ -5,7 +5,6 @@ import me.whizvox.findme.command.ArgumentHelper;
 import me.whizvox.findme.command.CommandContext;
 import me.whizvox.findme.command.CommandHandler;
 import me.whizvox.findme.core.FMStrings;
-import me.whizvox.findme.core.collection.CollectionDbo;
 import me.whizvox.findme.core.findable.FindableDbo;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.repo.Page;
@@ -40,7 +39,7 @@ public class ListCommandHandler extends CommandHandler {
     int pageNum = ArgumentHelper.getInt(context, 1, () -> 1, 1, Integer.MAX_VALUE);
     Page<FindableDbo> page = FindMe.inst().getFindables().getRepo().findAll(new Pageable(pageNum, 10));
     page.items().forEach(findable -> {
-      String collectionName = FindMe.inst().getCollections().getCollection(findable.collectionId()).map(CollectionDbo::name).orElse(ChatColor.RED + "???");
+      String collectionName = FindMe.inst().getCollections().getCollection(findable.collectionId()).map(col -> col.name).orElse(ChatColor.RED + "???");
       if (findable.isBlock()) {
         World world = Bukkit.getWorld(findable.uuid());
         if (world != null) {

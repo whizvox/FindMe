@@ -1,6 +1,5 @@
 package me.whizvox.findme.findable;
 
-import me.whizvox.findme.core.findable.FindableDbo;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 

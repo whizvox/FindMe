@@ -2,16 +2,16 @@ package me.whizvox.findme.command;
 
 import me.whizvox.findme.FindMe;
 import me.whizvox.findme.core.FMStrings;
-import me.whizvox.findme.core.collection.CollectionDbo;
+import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
+import me.whizvox.findme.util.FMUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.util.RayTraceResult;
 
+import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -53,10 +53,26 @@ public class ArgumentHelper {
     return getInt(context, index, InterruptCommandException::showUsage, min, max);
   }
 
-  public static CollectionDbo getCollection(CommandContext context, int index) {
+  public static String getLimitedString(CommandContext context, int index, Supplier<String> defaultValue, Collection<String> possibleValues) {
+    String str = getString(context, index, defaultValue);
+    if (possibleValues.contains(str)) {
+      return str;
+    }
+    return InterruptCommandException.halt("Invalid argument, must be one of [" + String.join(", ", possibleValues) + "]");
+  }
+
+  public static String getLimitedString(CommandContext context, int index, Collection<String> possibleValues) {
+    String str = getString(context, index, InterruptCommandException::showUsage);
+    if (possibleValues.contains(str)) {
+      return str;
+    }
+    return InterruptCommandException.halt("Invalid argument, must be one of [" + String.join(", ", possibleValues) + "]");
+  }
+
+  public static FindableCollection getCollection(CommandContext context, int index, boolean defaultIfMissing) {
     return getArgument(context, index,
-        () -> FindMe.inst().getCollections().defaultCollection,
-        name -> FindMe.inst().getCollections().getRepo().findByName(name).orElseThrow(() -> new InterruptCommandException("Unknown collection: " + name, false))
+        () -> defaultIfMissing ? FindMe.inst().getCollections().getDefaultCollection() : InterruptCommandException.showUsage(),
+        name -> FindMe.inst().getCollections().getCollection(name).orElseThrow(() -> new InterruptCommandException("Unknown collection: " + name, false))
     );
   }
 
@@ -77,12 +93,7 @@ public class ArgumentHelper {
 
   public static Entity getEntity(CommandContext context, int index) {
     return getEntity(context, index, () -> {
-      Player player = context.getPlayer();
-      RayTraceResult hit = player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getLocation().getDirection(), 5.0, entity -> !(entity instanceof Player));
-      if (hit == null) {
-        return InterruptCommandException.halt("No entity found");
-      }
-      Entity entity = hit.getHitEntity();
+      Entity entity = FMUtils.getLookingAtEntity(context.getPlayer(), e -> true);
       if (entity == null) {
         return InterruptCommandException.halt("No entity found");
       }
@@ -121,13 +132,9 @@ public class ArgumentHelper {
       if (!defaultPlayerLookingAt) {
         return InterruptCommandException.showUsage();
       }
-      RayTraceResult hit = context.getPlayer().rayTraceBlocks(5.0);
-      if (hit == null) {
-        return InterruptCommandException.halt("Not looking at a block");
-      }
-      Block block = hit.getHitBlock();
+      Block block = FMUtils.getLookingAtBlock(context.getPlayer());
       if (block == null) {
-        return InterruptCommandException.halt("Not looking at a block");
+        return InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERROR_NO_BLOCK_FOUND));
       }
       return block.getLocation();
     });

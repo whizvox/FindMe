@@ -21,6 +21,10 @@ public class FindMeCommandDelegator extends CommandDelegator {
     register("remove", List.of("rem"), new RemoveCommandHandler());
     register("removeblock", List.of("remb"), new RemoveBlockCommandHandler());
     register("removeentity", List.of("reme"), new RemoveEntityHandler());
+    register("set", List.of(), new SetCommandHandler());
+    register("get", List.of(), new GetCommandHandler());
+    register("setdefault", List.of(), new SetDefaultCommandHandler());
+    register("collections", List.of("col"), new CollectionsCommandHandler());
   }
 
   @Override
