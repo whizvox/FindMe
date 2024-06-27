@@ -6,6 +6,7 @@ import me.whizvox.findme.core.LocalizationManager;
 import me.whizvox.findme.core.collection.CollectionManager;
 import me.whizvox.findme.core.findable.FindableManager;
 import me.whizvox.findme.core.founditem.FoundItemManager;
+import me.whizvox.findme.listener.FindMePlayerListener;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -131,6 +132,8 @@ public final class FindMe extends JavaPlugin {
     PluginCommand command = getCommand("findme");
     command.setExecutor(commandDelegator);
     command.setTabCompleter(commandDelegator);
+
+    getServer().getPluginManager().registerEvents(new FindMePlayerListener(), this);
   }
 
   @Override

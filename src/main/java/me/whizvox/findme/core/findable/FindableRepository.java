@@ -8,9 +8,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class FindableRepository extends Repository {
 
@@ -26,6 +24,7 @@ public class FindableRepository extends Repository {
           "FOREIGN KEY (collection) REFERENCES collections(id)" +
       ")",
       SQL_COUNT = "SELECT COUNT(*) FROM findables",
+      SQL_COUNT_COLLECTIONS = "SELECT collection,COUNT(*) AS count FROM findables GROUP BY collection",
       SQL_INSERT = "INSERT INTO findables (id,collection,is_block,uuid,x,y,z) VALUES (?,?,?,?,?,?,?)",
       SQL_SELECT_ALL = "SELECT id,collection,is_block,uuid,x,y,z FROM findables",
       SQL_SELECT_ONE = SQL_SELECT_ALL + " WHERE id=?",
@@ -95,6 +94,16 @@ public class FindableRepository extends Repository {
 
   public Optional<FindableDbo> findBlock(UUID worldId, int x, int y, int z) {
     return fetchOne(SQL_SELECT_BLOCK, List.of(worldId, x, y, z), FROM_ROW);
+  }
+
+  public Map<Integer, Integer> countCollections() {
+    return executeQuery(SQL_COUNT_COLLECTIONS, null, rs -> {
+      Map<Integer, Integer> counts = new HashMap<>();
+      while (rs.next()) {
+        counts.put(rs.getInt(1), rs.getInt(2));
+      }
+      return counts;
+    });
   }
 
   public void deleteById(int id) {

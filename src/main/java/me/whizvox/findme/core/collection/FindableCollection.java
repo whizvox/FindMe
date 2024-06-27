@@ -125,7 +125,7 @@ public final class FindableCollection {
     data.keySet().forEach(key -> {
       Field field = FIELDS.get(key);
       Class<?> type = field.getType();
-      if (Integer.class.isAssignableFrom(type)) {
+      if (Integer.TYPE.isAssignableFrom(type)) {
         readInt(data, key, value -> setField(field, value));
       } else if (Boolean.class.isAssignableFrom(type)) {
         readBoolean(data, key, value -> setField(field, value));

@@ -19,11 +19,13 @@ public class FindableManager {
   private final FindableRepository repo;
   private final Map<Location, Findable<Block>> blockIds;
   private final Map<UUID, Findable<Entity>> entityIds;
+  private final Map<Integer, Integer> collectionCounts;
 
   public FindableManager(Connection conn) {
     repo = new FindableRepository(conn);
     blockIds = new HashMap<>();
     entityIds = new HashMap<>();
+    collectionCounts = new HashMap<>();
     repo.initialize();
     refresh();
   }
@@ -40,6 +42,10 @@ public class FindableManager {
     return getBlock(new Location(world, x, y, z));
   }
 
+  public int getCount(int collectionId) {
+    return collectionCounts.getOrDefault(collectionId, 0);
+  }
+
   public Findable<Entity> getEntity(Entity entity) {
     return entityIds.getOrDefault(entity.getUniqueId(), Findable.NULL_ENTITY);
   }
@@ -48,6 +54,7 @@ public class FindableManager {
     FindableDbo findable = repo.addBlock(collectionId, block.getWorld().getUID(), block.getX(), block.getY(), block.getZ());
     Findable<Block> findableBlock = Findable.ofBlock(findable.id(), collectionId, block);
     blockIds.put(block.getLocation(), findableBlock);
+    collectionCounts.put(collectionId, collectionCounts.getOrDefault(collectionId, 0) + 1);
     return findableBlock;
   }
 
@@ -55,12 +62,14 @@ public class FindableManager {
     FindableDbo findable = repo.addEntity(collectionId, entity.getUniqueId());
     Findable<Entity> findableEntity = Findable.ofEntity(findable.id(), findable.collectionId(), entity);
     entityIds.put(entity.getUniqueId(), findableEntity);
+    collectionCounts.put(collectionId, collectionCounts.getOrDefault(collectionId, 0) + 1);
     return findableEntity;
   }
 
   public void refresh() {
     blockIds.clear();
     entityIds.clear();
+    collectionCounts.clear();
     repo.findAll().forEach(findable -> {
       if (findable.isBlock()) {
         World world = Bukkit.getWorld(findable.uuid());
@@ -80,6 +89,7 @@ public class FindableManager {
         }
       }
     });
+    collectionCounts.putAll(repo.countCollections());
   }
 
 }

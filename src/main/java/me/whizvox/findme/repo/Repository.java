@@ -76,7 +76,7 @@ public abstract class Repository {
   }
 
   protected <R> R executeQuery(String sql, @Nullable List<Object> args, SQLFunction<ResultSet, R> consumer) {
-    return executePrepared(sql,args, stmt -> {
+    return executePrepared(sql, args, stmt -> {
       ResultSet rs = stmt.executeQuery();
       return consumer.accept(rs);
     });

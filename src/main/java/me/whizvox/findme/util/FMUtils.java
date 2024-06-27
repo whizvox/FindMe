@@ -6,7 +6,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.RayTraceResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Map;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 public class FMUtils {
 
@@ -22,6 +24,14 @@ public class FMUtils {
         entity -> entity != player && filter.test(entity)
     );
     return hit != null ? hit.getHitEntity() : null;
+  }
+
+  public static String format(String str, Map<String, Object> args) {
+    String finalStr = str;
+    for (String key : args.keySet()) {
+      finalStr = finalStr.replaceAll(Pattern.quote("{" + key + "}"), String.valueOf(args.get(key)));
+    }
+    return finalStr;
   }
 
 }

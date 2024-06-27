@@ -4,6 +4,7 @@ import me.whizvox.findme.core.command.CollectionsCommandHandler;
 import me.whizvox.findme.core.command.GetCommandHandler;
 import me.whizvox.findme.core.command.SetCommandHandler;
 import me.whizvox.findme.core.command.SetDefaultCommandHandler;
+import me.whizvox.findme.listener.FindMePlayerListener;
 
 import java.util.Map;
 
@@ -74,7 +75,7 @@ public class FMStrings {
         entry(COMMAND_REMOVE_ANY_DESCRIPTION, "Remove a findable block or entity from its collection"),
         entry(COMMAND_REMOVE_ANY_NOT_FOUND, "&cNo findable found with that ID"),
         entry(COMMAND_REMOVE_ANY_BLOCK, "&aBlock %1$s &b#%2$d&a (&e%3$s&a) in &e%4$s&a at &b%5$d&a,&b%6$d&a,&b%7$d&a removed"),
-        entry(COMMAND_REMOVE_ANY_ENTITY, "&aEntity %$1s &b#%$2d&a (&e%$3s&a) in &e%$4s&a at &b%5$.1f&a,&b%6$.1&a,&b%$7.1f&a removed"),
+        entry(COMMAND_REMOVE_ANY_ENTITY, "&aEntity %$1s &b#%$2d&a (&e%$3s&a) in &e%4$s&a at &b%5$.1f&a,&b%6$.1&a,&b%$7.1f&a removed"),
         entry(COMMAND_REMOVE_ANY_UNKNOWN_BLOCK, "&aUnknown block &b#%1$d&a (&e%2$s&a) removed"),
         entry(COMMAND_REMOVE_ANY_UNKNOWN_ENTITY, "&aUnknown entity &b#%1$d&a (&e%2$s&a) removed"),
         entry(COMMAND_REMOVE_BLOCK_DESCRIPTION, "Remove a findable block from its collection"),
@@ -98,7 +99,9 @@ public class FMStrings {
         entry(SetDefaultCommandHandler.TLK_NO_CHANGE, "&cThat is already the default collection"),
         entry(SetDefaultCommandHandler.TLK_SUCCESS, "&aDefault collection has been changed to %s"),
         entry(CollectionsCommandHandler.TLK_HEADER, "&7=-= &bCollections &7=-="),
-        entry(CollectionsCommandHandler.TLK_ENTRY, "- &b%1$s&r (&e%2$s&r)")
+        entry(CollectionsCommandHandler.TLK_ENTRY, "- &b%1$s&r (&e%2$s&r)"),
+        entry(FindMePlayerListener.TLK_UNKNOWN_COLLECTION, "&cUnknown collection: %s"),
+        entry(FindMePlayerListener.TLK_ALREADY_FOUND, "&cYou've already found this!")
     );
   }
 
