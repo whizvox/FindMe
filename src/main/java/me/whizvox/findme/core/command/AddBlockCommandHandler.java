@@ -4,6 +4,7 @@ import me.whizvox.findme.FindMe;
 import me.whizvox.findme.command.ArgumentHelper;
 import me.whizvox.findme.command.CommandContext;
 import me.whizvox.findme.command.CommandHandler;
+import me.whizvox.findme.command.SuggestionHelper;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
@@ -11,6 +12,8 @@ import me.whizvox.findme.findable.Findable;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+
+import java.util.List;
 
 public class AddBlockCommandHandler extends CommandHandler {
 
@@ -27,6 +30,15 @@ public class AddBlockCommandHandler extends CommandHandler {
   @Override
   public String getUsageArguments() {
     return "[<collection> [<x> <y> <z> [<world>]]]";
+  }
+
+  @Override
+  public List<String> listSuggestions(CommandContext context) {
+    return switch (context.argCount()) {
+      case 2 -> SuggestionHelper.collections(context.arg(1));
+      case 6 -> SuggestionHelper.worlds(context.arg(5));
+      default -> super.listSuggestions(context);
+    };
   }
 
   @Override

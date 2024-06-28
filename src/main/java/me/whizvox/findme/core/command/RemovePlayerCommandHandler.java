@@ -4,10 +4,13 @@ import me.whizvox.findme.FindMe;
 import me.whizvox.findme.command.ArgumentHelper;
 import me.whizvox.findme.command.CommandContext;
 import me.whizvox.findme.command.CommandHandler;
+import me.whizvox.findme.command.SuggestionHelper;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.exception.InterruptCommandException;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+
+import java.util.List;
 
 public class RemovePlayerCommandHandler extends CommandHandler {
 
@@ -25,6 +28,25 @@ public class RemovePlayerCommandHandler extends CommandHandler {
   @Override
   public String getUsageArguments() {
     return "<player> [c:<collection>|f:<findableId>]";
+  }
+
+  private static final List<String> OPTIONS = List.of("c:", "f:");
+
+  @Override
+  public List<String> listSuggestions(CommandContext context) {
+    if (context.argCount() == 2) {
+      return SuggestionHelper.offlinePlayers(context.arg(1));
+    } else if (context.argCount() == 3) {
+      String query = context.arg(2);
+      if (query.startsWith("c:")) {
+        return SuggestionHelper.fromStream(FindMe.inst().getCollections().stream().map(col -> "c:" + col.name), query);
+      }
+      List<String> suggestions = SuggestionHelper.fromStream(OPTIONS.stream(), query);
+      if (!suggestions.isEmpty()) {
+        return suggestions;
+      }
+    }
+    return super.listSuggestions(context);
   }
 
   @Override

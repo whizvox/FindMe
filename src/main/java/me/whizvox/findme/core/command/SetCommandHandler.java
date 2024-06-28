@@ -4,6 +4,7 @@ import me.whizvox.findme.FindMe;
 import me.whizvox.findme.command.ArgumentHelper;
 import me.whizvox.findme.command.CommandContext;
 import me.whizvox.findme.command.CommandHandler;
+import me.whizvox.findme.command.SuggestionHelper;
 import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.util.ChatUtils;
@@ -11,6 +12,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.command.CommandSender;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +33,15 @@ public class SetCommandHandler extends CommandHandler {
   @Override
   public String getUsageArguments() {
     return "<collection> <property> [value]";
+  }
+
+  @Override
+  public List<String> listSuggestions(CommandContext context) {
+    return switch (context.argCount()) {
+      case 2 -> SuggestionHelper.collections(context.arg(1));
+      case 3 -> SuggestionHelper.fromStream(FindableCollection.FIELDS.keySet().stream(), context.arg(2));
+      default -> super.listSuggestions(context);
+    };
   }
 
   private static final Set<String> possibleFields = FindableCollection.FIELDS.keySet().stream()

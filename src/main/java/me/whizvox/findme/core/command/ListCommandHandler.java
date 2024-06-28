@@ -4,6 +4,7 @@ import me.whizvox.findme.FindMe;
 import me.whizvox.findme.command.ArgumentHelper;
 import me.whizvox.findme.command.CommandContext;
 import me.whizvox.findme.command.CommandHandler;
+import me.whizvox.findme.command.SuggestionHelper;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.core.findable.FindableDbo;
 import me.whizvox.findme.exception.InterruptCommandException;
@@ -16,6 +17,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+
+import java.util.List;
 
 public class ListCommandHandler extends CommandHandler {
 
@@ -32,6 +35,14 @@ public class ListCommandHandler extends CommandHandler {
   @Override
   public String getUsageArguments() {
     return "[<page>]";
+  }
+
+  @Override
+  public List<String> listSuggestions(CommandContext context) {
+    if (context.argCount() == 2) {
+      return SuggestionHelper.pages(context.arg(1), FindMe.inst().getFindables().getTotalCount());
+    }
+    return super.listSuggestions(context);
   }
 
   @Override

@@ -36,6 +36,14 @@ public class HelpCommandHelper extends CommandHandler {
   }
 
   @Override
+  public List<String> listSuggestions(CommandContext context) {
+    if (context.argCount() == 2) {
+      return SuggestionHelper.pages(context.arg(1), parent.getHandlers().size(), 10);
+    }
+    return super.listSuggestions(context);
+  }
+
+  @Override
   public void execute(CommandContext context) throws InterruptCommandException {
     int pageNum = ArgumentHelper.getInt(context, 1, () -> 1, 1, Integer.MAX_VALUE);
     Pageable pageable = new Pageable(pageNum, 10);
@@ -43,6 +51,7 @@ public class HelpCommandHelper extends CommandHandler {
         .filter(cmd -> parent.getHandler(cmd).hasPermission(context.sender()))
         .sorted()
         .skip((pageNum - 1) * pageable.limit())
+        .limit(10)
         .toList();
     List<String> messages = new ArrayList<>();
     messages.add(FindMe.inst().translate(FMStrings.COMMAND_HELP_HEADER, context.command().getName(), pageNum, (int) Math.ceil((double) parent.getHandlers().size() / pageable.limit())));

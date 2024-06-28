@@ -33,8 +33,10 @@ public class RemoveEntityHandler extends CommandHandler {
     Findable<Entity> findable = FindMe.inst().getFindables().getEntity(entity);
     if (findable.isEmpty()) {
       context.sendMessage(FindMe.inst().translate(FMStrings.COMMAND_REMOVE_ENTITY_NOT_FOUND));
+      return;
     }
-    FindMe.inst().getFindables().getRepo().deleteEntity(entity.getUniqueId());
+    FindMe.inst().getFoundItems().removeFindable(findable.id());
+    FindMe.inst().getFindables().remove(findable.id());
     context.sendMessage(FindMe.inst().translate(FMStrings.COMMAND_REMOVE_ENTITY_SUCCESS));
   }
 

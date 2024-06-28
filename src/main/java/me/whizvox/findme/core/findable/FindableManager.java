@@ -52,6 +52,10 @@ public class FindableManager {
     return byId.get(id);
   }
 
+  public int getTotalCount() {
+    return byId.size();
+  }
+
   public int getCount(int collectionId) {
     return collectionCounts.getOrDefault(collectionId, 0);
   }

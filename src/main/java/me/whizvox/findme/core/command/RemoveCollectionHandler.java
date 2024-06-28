@@ -4,9 +4,12 @@ import me.whizvox.findme.FindMe;
 import me.whizvox.findme.command.ArgumentHelper;
 import me.whizvox.findme.command.CommandContext;
 import me.whizvox.findme.command.CommandHandler;
+import me.whizvox.findme.command.SuggestionHelper;
 import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
 import org.bukkit.command.CommandSender;
+
+import java.util.List;
 
 public class RemoveCollectionHandler extends CommandHandler {
 
@@ -21,6 +24,14 @@ public class RemoveCollectionHandler extends CommandHandler {
   @Override
   public String getUsageArguments() {
     return "<collection>";
+  }
+
+  @Override
+  public List<String> listSuggestions(CommandContext context) {
+    if (context.argCount() == 2) {
+      return SuggestionHelper.collections(context.arg(1));
+    }
+    return super.listSuggestions(context);
   }
 
   @Override

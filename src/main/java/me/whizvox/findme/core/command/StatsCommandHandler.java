@@ -28,6 +28,14 @@ public class StatsCommandHandler extends CommandHandler {
   }
 
   @Override
+  public List<String> listSuggestions(CommandContext context) {
+    if (context.argCount() == 2 && context.sender().hasPermission("findme.stats.other")) {
+      return SuggestionHelper.offlinePlayers(context.arg(1));
+    }
+    return super.listSuggestions(context);
+  }
+
+  @Override
   public void execute(CommandContext context) throws InterruptCommandException {
     OfflinePlayer player = ArgumentHelper.getOfflinePlayer(context, 1, context::getPlayer);
     List<CollectionCount> counts = new ArrayList<>();

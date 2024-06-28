@@ -4,6 +4,7 @@ import me.whizvox.findme.FindMe;
 import me.whizvox.findme.command.ArgumentHelper;
 import me.whizvox.findme.command.CommandContext;
 import me.whizvox.findme.command.CommandHandler;
+import me.whizvox.findme.command.SuggestionHelper;
 import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
 import org.bukkit.ChatColor;
@@ -11,6 +12,7 @@ import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 public class GetCommandHandler extends CommandHandler {
 
@@ -25,6 +27,15 @@ public class GetCommandHandler extends CommandHandler {
   @Override
   public String getUsageArguments() {
     return "<collection> <property>";
+  }
+
+  @Override
+  public List<String> listSuggestions(CommandContext context) {
+    return switch (context.argCount()) {
+      case 2 -> SuggestionHelper.collections(context.arg(1));
+      case 3 -> SuggestionHelper.fromStream(FindableCollection.FIELDS.keySet().stream(), context.arg(2));
+      default -> super.listSuggestions(context);
+    };
   }
 
   @Override
