@@ -1,6 +1,7 @@
 package me.whizvox.findme.listener;
 
 import me.whizvox.findme.FindMe;
+import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.findable.Findable;
 import me.whizvox.findme.util.FMUtils;
 import org.bukkit.Location;
@@ -17,7 +18,6 @@ import java.util.UUID;
 public class FindMePlayerListener implements Listener {
 
   public static final String
-      TLK_UNKNOWN_COLLECTION = "error.unknownCollection",
       TLK_ALREADY_FOUND = "error.alreadyFound";
 
   private static final Map<UUID, Long> COOLDOWNS = new HashMap<>();
@@ -50,7 +50,7 @@ public class FindMePlayerListener implements Listener {
           player.sendMessage(FMUtils.format(collection.findMsg, args));
           player.playSound(player, collection.findSound, 1, 1);
         }, () -> {
-          player.sendMessage(FindMe.inst().translate(TLK_UNKNOWN_COLLECTION, findable.collectionId()));
+          player.sendMessage(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_COLLECTION, findable.collectionId()));
         });
       }
     }

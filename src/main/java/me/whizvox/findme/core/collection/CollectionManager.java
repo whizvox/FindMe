@@ -84,4 +84,15 @@ public class CollectionManager {
     return byName.values().stream();
   }
 
+  public void delete(int collectionId) {
+    if (defaultCollection.id == collectionId) {
+      throw new IllegalStateException("Cannot delete default collection");
+    }
+    FindableCollection collection = byId.remove(collectionId);
+    if (collection != null) {
+      byName.remove(collection.name);
+    }
+    FindMe.inst().saveCollections();
+  }
+
 }

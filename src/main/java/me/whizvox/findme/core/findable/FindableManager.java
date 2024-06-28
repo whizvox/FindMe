@@ -17,14 +17,16 @@ import java.util.logging.Level;
 public class FindableManager {
 
   private final FindableRepository repo;
-  private final Map<Location, Findable<Block>> blockIds;
-  private final Map<UUID, Findable<Entity>> entityIds;
+  private final Map<Location, Findable<Block>> blocks;
+  private final Map<UUID, Findable<Entity>> entities;
+  private final Map<Integer, Findable<?>> byId;
   private final Map<Integer, Integer> collectionCounts;
 
   public FindableManager(Connection conn) {
     repo = new FindableRepository(conn);
-    blockIds = new HashMap<>();
-    entityIds = new HashMap<>();
+    blocks = new HashMap<>();
+    entities = new HashMap<>();
+    byId = new HashMap<>();
     collectionCounts = new HashMap<>();
     repo.initialize();
     refresh();
@@ -35,25 +37,30 @@ public class FindableManager {
   }
 
   public Findable<Block> getBlock(Location location) {
-    return blockIds.getOrDefault(location, Findable.NULL_BLOCK);
+    return blocks.getOrDefault(location, Findable.NULL_BLOCK);
   }
 
   public Findable<Block> getBlock(World world, int x, int y, int z) {
     return getBlock(new Location(world, x, y, z));
   }
 
-  public int getCount(int collectionId) {
-    return collectionCounts.getOrDefault(collectionId, 0);
+  public Findable<Entity> getEntity(Entity entity) {
+    return entities.getOrDefault(entity.getUniqueId(), Findable.NULL_ENTITY);
   }
 
-  public Findable<Entity> getEntity(Entity entity) {
-    return entityIds.getOrDefault(entity.getUniqueId(), Findable.NULL_ENTITY);
+  public Findable<?> get(int id) {
+    return byId.get(id);
+  }
+
+  public int getCount(int collectionId) {
+    return collectionCounts.getOrDefault(collectionId, 0);
   }
 
   public Findable<Block> addBlock(int collectionId, Block block) {
     FindableDbo findable = repo.addBlock(collectionId, block.getWorld().getUID(), block.getX(), block.getY(), block.getZ());
     Findable<Block> findableBlock = Findable.ofBlock(findable.id(), collectionId, block);
-    blockIds.put(block.getLocation(), findableBlock);
+    blocks.put(block.getLocation(), findableBlock);
+    byId.put(findable.id(), findableBlock);
     collectionCounts.put(collectionId, collectionCounts.getOrDefault(collectionId, 0) + 1);
     return findableBlock;
   }
@@ -61,14 +68,21 @@ public class FindableManager {
   public Findable<Entity> addEntity(int collectionId, Entity entity) {
     FindableDbo findable = repo.addEntity(collectionId, entity.getUniqueId());
     Findable<Entity> findableEntity = Findable.ofEntity(findable.id(), findable.collectionId(), entity);
-    entityIds.put(entity.getUniqueId(), findableEntity);
+    entities.put(entity.getUniqueId(), findableEntity);
+    byId.put(findable.id(), findableEntity);
     collectionCounts.put(collectionId, collectionCounts.getOrDefault(collectionId, 0) + 1);
     return findableEntity;
   }
 
+  public void remove(int id) {
+    repo.deleteById(id);
+    refresh();
+  }
+
   public void refresh() {
-    blockIds.clear();
-    entityIds.clear();
+    blocks.clear();
+    entities.clear();
+    byId.clear();
     collectionCounts.clear();
     repo.findAll().forEach(findable -> {
       if (findable.isBlock()) {
@@ -78,14 +92,17 @@ public class FindableManager {
         } else {
           Location loc = new Location(world, findable.x(), findable.y(), findable.z());
           Findable<Block> block = Findable.ofBlock(findable.id(), findable.collectionId(), world.getBlockAt(loc));
-          blockIds.put(loc, block);
+          blocks.put(loc, block);
+          byId.put(findable.id(), block);
         }
       } else {
         Entity entity = Bukkit.getEntity(findable.uuid());
         if (entity == null) {
           FindMe.inst().getLogger().log(Level.WARNING, "Could not load entity findable (id={}) from database, unknown entity ID: {}", new Object[] { findable.id(), findable.uuid() });
         } else {
-          entityIds.put(findable.uuid(), Findable.ofEntity(findable.id(), findable.collectionId(), entity));
+          Findable<Entity> findableEntity = Findable.ofEntity(findable.id(), findable.collectionId(), entity);
+          entities.put(findable.uuid(), findableEntity);
+          byId.put(findable.id(), findableEntity);
         }
       }
     });

@@ -41,13 +41,17 @@ public class FoundItemManager {
     return foundItemCounts.getOrDefault(player.getUniqueId(), Map.of()).getOrDefault(collectionId, 0);
   }
 
+  public Map<Integer, Integer> countPlayerItems(UUID player) {
+    return repo.countPlayerItems(player);
+  }
+
   public void setFound(Player player, Findable<?> findable) {
     repo.insert(new FoundItemDbo(player.getUniqueId(), findable.collectionId(), findable.id()));
     setFound0(player.getUniqueId(), findable.collectionId(), findable.id());
   }
 
-  public void removePlayer(Player player) {
-    repo.deleteByPlayer(player.getUniqueId());
+  public void removePlayer(UUID playerId) {
+    repo.deleteByPlayer(playerId);
     refresh();
   }
 
@@ -58,6 +62,16 @@ public class FoundItemManager {
 
   public void removeFindable(int findableId) {
     repo.deleteByFindable(findableId);
+    refresh();
+  }
+
+  public void removePlayerCollection(UUID playerId, int collectionId) {
+    repo.deleteByPlayerCollection(playerId, collectionId);
+    refresh();
+  }
+
+  public void removePlayerFindable(UUID playerId, int findableId) {
+    repo.deleteOne(playerId, findableId);
     refresh();
   }
 

@@ -1,9 +1,6 @@
 package me.whizvox.findme.core;
 
-import me.whizvox.findme.core.command.CollectionsCommandHandler;
-import me.whizvox.findme.core.command.GetCommandHandler;
-import me.whizvox.findme.core.command.SetCommandHandler;
-import me.whizvox.findme.core.command.SetDefaultCommandHandler;
+import me.whizvox.findme.core.command.*;
 import me.whizvox.findme.listener.FindMePlayerListener;
 
 import java.util.Map;
@@ -22,6 +19,9 @@ public class FMStrings {
       ERROR_INT_OUT_OF_RANGE = "error.intOutOfRange",
       ERROR_MANUAL_NO_COMMAND_FOUND = "error.manual.noCommandFound",
       ERROR_NO_BLOCK_FOUND = "error.noBlockFound",
+      ERR_UNKNOWN_COLLECTION = "error.unknownCollection",
+      ERR_UNKNOWN_FINDABLE = "error.unknownFindable",
+      ERR_UNKNOWN_PLAYER = "error.unknownPlayer",
       COMMAND_HELP_HEADER = "command.help.header",
       COMMAND_HELP_ENTRY = "command.help.entry",
       COMMAND_HELP_DESCRIPTION = "command.help.description",
@@ -91,6 +91,9 @@ public class FMStrings {
         entry(COMMAND_LIST_ENTITY, "- &b#%d&r (&e%s&r) %s in &e%s&r at &b%.1f&r,&b%.1f&r,&b%.1f"),
         entry(COMMAND_LIST_UNKNOWN_ENTITY, "- &b#%d&r (&e%s&r) &4<unknown entity>&r (&b%s&r)"),
         entry(COMMAND_FINDME_INFO, "&7=-= &bPlugin Information for &eFindMe &7=-=\n&aVersion: ???\n&aRun &b/findme help&a to view all commands\n&aFor more detailed information, check out the wiki: &ehttps://github.com/whizvox/FindMe/wiki"),
+        entry(ERR_UNKNOWN_COLLECTION, "&cUnknown collection: %s"),
+        entry(ERR_UNKNOWN_FINDABLE, "&cUnknown findable: %s"),
+        entry(ERR_UNKNOWN_PLAYER, "&cUnknown player: %s"),
         entry(SetCommandHandler.TLK_UNKNOWN_SOUND, "&cUnknown sound: %s"),
         entry(SetCommandHandler.TLK_SET, "&aSet the value of &b%1$s&a to %2$s&r&a for %3$s"),
         entry(SetCommandHandler.TLK_CANNOT_UNSET, "&aCannot unset that property"),
@@ -100,8 +103,18 @@ public class FMStrings {
         entry(SetDefaultCommandHandler.TLK_SUCCESS, "&aDefault collection has been changed to %s"),
         entry(CollectionsCommandHandler.TLK_HEADER, "&7=-= &bCollections &7=-="),
         entry(CollectionsCommandHandler.TLK_ENTRY, "- &b%1$s&r (&e%2$s&r)"),
-        entry(FindMePlayerListener.TLK_UNKNOWN_COLLECTION, "&cUnknown collection: %s"),
-        entry(FindMePlayerListener.TLK_ALREADY_FOUND, "&cYou've already found this!")
+        entry(FindMePlayerListener.TLK_ALREADY_FOUND, "&cYou've already found this!"),
+        entry(CreateCommandHandler.TLK_NAME_CONFLICT, "&cThere already exists a collection with that name"),
+        entry(CreateCommandHandler.TLK_SUCCESS, "&aCreated collection %s"),
+        entry(RemoveCollectionHandler.TLK_SUCCESS, "&aRemoved collection %s"),
+        entry(RemoveFindableCommandHandler.TLK_SUCCESS, "&aRemoved findable %s"),
+        entry(RemovePlayerCommandHandler.TLK_DEFAULT_CONFLICT, "&cCannot remove the default collection"),
+        entry(RemovePlayerCommandHandler.TLK_SUCCESS_PLAYER, "&aRemoved all findables collected by %s"),
+        entry(RemovePlayerCommandHandler.TLK_SUCCESS_COLLECTION, "&aRemoved all findables from player's collection"),
+        entry(RemovePlayerCommandHandler.TLK_SUCCESS_FINDABLE, "&aRemoved player's findable"),
+        entry(StatsCommandHandler.TLK_NO_COLLECTIONS, "&cNo collections..."),
+        entry(StatsCommandHandler.TLK_HEADER, "&7=-= &bStats for &e%s &7=-="),
+        entry(StatsCommandHandler.TLK_ENTRY, "- &b%1$s&r: &e%2$d&r/&e%3$d&r (%4$.1f%%)")
     );
   }
 

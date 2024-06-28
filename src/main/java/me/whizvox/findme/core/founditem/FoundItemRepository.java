@@ -8,7 +8,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class FoundItemRepository extends Repository {
@@ -22,6 +24,7 @@ public class FoundItemRepository extends Repository {
       ")",
       SQL_INSERT = "INSERT INTO found_items (player,collection,findable) VALUES (?,?,?)",
       SQL_SELECT_COUNT = "SELECT COUNT(*) FROM found_items",
+      SQL_SELECT_PLAYER_COUNTS = "SELECT collection,COUNT(*) AS count FROM found_items WHERE player=? GROUP BY collection",
       SQL_SELECT_ALL = "SELECT player,collection,findable FROM found_items",
       SQL_SELECT_BY_PLAYER = SQL_SELECT_ALL + " WHERE player=?",
       SQL_SELECT_BY_COLLECTION = SQL_SELECT_ALL + " WHERE collection=?",
@@ -32,7 +35,8 @@ public class FoundItemRepository extends Repository {
       SQL_DELETE_ONE = SQL_DELETE_ALL + " WHERE player=? AND findable=?",
       SQL_DELETE_BY_PLAYER = SQL_DELETE_ALL + " WHERE player=?",
       SQL_DELETE_BY_COLLECTION = SQL_DELETE_ALL + " WHERE collection=?",
-      SQL_DELETE_BY_FINDABLE = SQL_DELETE_ALL + " WHERE findable=?";
+      SQL_DELETE_BY_FINDABLE = SQL_DELETE_ALL + " WHERE findable=?",
+      SQL_DELETE_BY_PLAYER_COLLECTION = SQL_DELETE_ALL + " WHERE player=? AND collection=?";
 
   public FoundItemRepository(Connection conn) {
     super(conn);
@@ -76,6 +80,16 @@ public class FoundItemRepository extends Repository {
     return fetchPage(SQL_SELECT_PLAYER_COLLECTION, List.of(playerId, collectionId), pageable, FROM_ROW);
   }
 
+  public Map<Integer, Integer> countPlayerItems(UUID playerId) {
+    return executeQuery(SQL_SELECT_PLAYER_COUNTS, List.of(playerId), rs -> {
+      Map<Integer, Integer> counts = new HashMap<>();
+      while (rs.next()) {
+        counts.put(rs.getInt(1), rs.getInt(2));
+      }
+      return counts;
+    });
+  }
+
   public boolean exists(UUID playerId, int findableId) {
     return fetchOne(SQL_SELECT_ONE, List.of(playerId, findableId), FROM_ROW).isPresent();
   }
@@ -94,6 +108,10 @@ public class FoundItemRepository extends Repository {
 
   public void deleteByFindable(int findableId) {
     executeUpdate(SQL_DELETE_BY_FINDABLE, List.of(findableId));
+  }
+
+  public void deleteByPlayerCollection(UUID playerId, int findableId) {
+    executeUpdate(SQL_DELETE_BY_PLAYER_COLLECTION, List.of(playerId, findableId));
   }
 
   private static final SQLFunction<ResultSet, FoundItemDbo> FROM_ROW = rs -> new FoundItemDbo(

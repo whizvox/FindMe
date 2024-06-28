@@ -4,9 +4,11 @@ import me.whizvox.findme.FindMe;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
+import me.whizvox.findme.findable.Findable;
 import me.whizvox.findme.util.FMUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -69,11 +71,36 @@ public class ArgumentHelper {
     return InterruptCommandException.halt("Invalid argument, must be one of [" + String.join(", ", possibleValues) + "]");
   }
 
-  public static FindableCollection getCollection(CommandContext context, int index, boolean defaultIfMissing) {
+  public static FindableCollection getCollection(CommandContext context, int index, Supplier<FindableCollection> defaultValue) {
     return getArgument(context, index,
-        () -> defaultIfMissing ? FindMe.inst().getCollections().getDefaultCollection() : InterruptCommandException.showUsage(),
-        name -> FindMe.inst().getCollections().getCollection(name).orElseThrow(() -> new InterruptCommandException("Unknown collection: " + name, false))
+        defaultValue,
+        name -> FindMe.inst().getCollections().getCollection(name).orElseGet(() -> InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_COLLECTION, name)))
     );
+  }
+
+  public static FindableCollection getCollection(CommandContext context, int index, boolean defaultIfMissing) {
+    return getCollection(context, index,
+        () -> defaultIfMissing ? FindMe.inst().getCollections().getDefaultCollection() : InterruptCommandException.showUsage()
+    );
+  }
+
+  public static Findable<?> getFindable(CommandContext context, int index, Supplier<Findable<?>> defaultValue) {
+    return getArgument(context, index, defaultValue, str -> {
+      try {
+        int id = Integer.parseInt(str);
+        Findable<?> findable = FindMe.inst().getFindables().get(id);
+        if (findable == null) {
+          return InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_FINDABLE, str));
+        }
+        return findable;
+      } catch (NumberFormatException e) {
+        return InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_FINDABLE, str));
+      }
+    });
+  }
+
+  public static Findable<?> getFindable(CommandContext context, int index) {
+    return getFindable(context, index, InterruptCommandException::showUsage);
   }
 
   public static Entity getEntity(CommandContext context, int index, Supplier<Entity> defaultValue) {
@@ -114,10 +141,14 @@ public class ArgumentHelper {
     } else {
       String worldName = getString(context, index + 3);
       // first try to interpret it as a UUID
-      try {
-        UUID worldId = UUID.fromString(worldName);
-        world = Bukkit.getWorld(worldId);
-      } catch (IllegalArgumentException e) {
+      if (worldName.length() == 36) {
+        try {
+          UUID worldId = UUID.fromString(worldName);
+          world = Bukkit.getWorld(worldId);
+        } catch (IllegalArgumentException e) {
+          world = Bukkit.getWorld(worldName);
+        }
+      } else {
         world = Bukkit.getWorld(worldName);
       }
       if (world == null) {
@@ -138,6 +169,27 @@ public class ArgumentHelper {
       }
       return block.getLocation();
     });
+  }
+
+  public static OfflinePlayer getOfflinePlayer(CommandContext context, int index, Supplier<OfflinePlayer> defaultValue) {
+    return getArgument(context, index, defaultValue, str -> {
+      if (str.length() == 36) {
+        try {
+          UUID id = UUID.fromString(str);
+          return Bukkit.getOfflinePlayer(id);
+        } catch (IllegalArgumentException ignored) {}
+      }
+      for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+        if (player.getName().equalsIgnoreCase(str)) {
+          return player;
+        }
+      }
+      return InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_PLAYER, str));
+    });
+  }
+
+  public static OfflinePlayer getOfflinePlayer(CommandContext context, int index) {
+    return getOfflinePlayer(context, index, InterruptCommandException::showUsage);
   }
 
 }

@@ -1,5 +1,6 @@
 package me.whizvox.findme.command;
 
+import me.whizvox.findme.FindMe;
 import me.whizvox.findme.exception.InterruptCommandException;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -42,6 +43,14 @@ public record CommandContext(List<String> args,
 
   public void sendMessage(Iterable<String> messages) {
     sender.sendMessage(StreamSupport.stream(messages.spliterator(), false).toArray(String[]::new));
+  }
+
+  public void sendMessage(TranslatedMessages messages) {
+    sendMessage(messages.translateToArray());
+  }
+
+  public void sendTranslated(String key, Object... args) {
+    sendMessage(FindMe.inst().translate(key, args));
   }
 
 }
