@@ -15,7 +15,7 @@ public class SuggestionHelper {
 
   public static List<String> fromStream(Stream<String> stream, String query) {
     return stream
-        .filter(str -> str.startsWith(query))
+        .filter(str -> str.toLowerCase().startsWith(query.toLowerCase()))
         .sorted()
         .toList();
   }

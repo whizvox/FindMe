@@ -35,7 +35,8 @@ public class FindableRepository extends Repository {
       SQL_DELETE_ALL = "DELETE FROM findables",
       SQL_DELETE_ONE = SQL_DELETE_ALL + " WHERE id=?",
       SQL_DELETE_ENTITY = SQL_DELETE_ALL + " WHERE is_block=0 AND uuid=?",
-      SQL_DELETE_BLOCK = SQL_DELETE_ALL + " WHERE is_block=1 AND uuid=? AND x=? AND y=? AND z=?";
+      SQL_DELETE_BLOCK = SQL_DELETE_ALL + " WHERE is_block=1 AND uuid=? AND x=? AND y=? AND z=?",
+      SQL_DELETE_BY_COLLECTION = SQL_DELETE_ALL + " WHERE collection=?";
 
   private int nextId;
 
@@ -116,6 +117,10 @@ public class FindableRepository extends Repository {
 
   public void deleteBlock(UUID worldId, int x, int y, int z) {
     executeUpdate(SQL_DELETE_BLOCK, List.of(worldId, x, y, z));
+  }
+
+  public void deleteByCollection(int collectionId) {
+    executeUpdate(SQL_DELETE_BY_COLLECTION, List.of(collectionId));
   }
 
   private static final SQLFunction<ResultSet, FindableDbo> FROM_ROW = rs ->

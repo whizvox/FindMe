@@ -41,11 +41,11 @@ public class ArgumentHelper {
     try {
       int value = getArgument(context, index, defaultValue, Integer::parseInt);
       if (value < min || value > max) {
-        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INT_OUT_OF_RANGE, value));
+        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INT_OUT_OF_RANGE, value, min, max));
       }
       return value;
     } catch (NumberFormatException e) {
-      return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INVALID_INT));
+      return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INVALID_INT, context.arg(index)));
     }
   }
 

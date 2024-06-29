@@ -48,6 +48,7 @@ public class CreateCommandHandler extends CommandHandler {
       return;
     }
     FindMe.inst().getCollections().create(name, parent == null ? null : parent.name);
+    FindMe.inst().saveCollections();
     context.sendTranslated(TLK_SUCCESS, name);
   }
 

@@ -36,7 +36,7 @@ public class SetCommandHandler extends CommandHandler {
 
   @Override
   public String getUsageArguments() {
-    return "<collection> <property> [value]";
+    return "<collection> <property> [<value>]";
   }
 
   @Override

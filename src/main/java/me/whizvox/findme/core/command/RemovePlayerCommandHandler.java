@@ -14,7 +14,6 @@ public class RemovePlayerCommandHandler extends CommandHandler {
   public static final String
       PERMISSION = "findme.remove.player",
       TLK_DESCRIPTION = "remove.player.description",
-      TLK_DEFAULT_CONFLICT = "remove.player.defaultConflict",
       TLK_SUCCESS_PLAYER = "remove.player.successSingle",
       TLK_SUCCESS_COLLECTION = "remove.player.successCollection",
       TLK_SUCCESS_FINDABLE = "remove.player.successFindable";
@@ -63,13 +62,8 @@ public class RemovePlayerCommandHandler extends CommandHandler {
     } else if (query.startsWith("c:")) {
       String collectionName = query.substring(2);
       FindMe.inst().getCollections().getCollection(collectionName).ifPresentOrElse(collection -> {
-        if (FindMe.inst().getCollections().defaultCollection.id != collection.id) {
-          FindMe.inst().getFoundItems().removeCollection(collection.id);
-          FindMe.inst().getCollections().delete(collection.id);
-          context.sendTranslated(TLK_SUCCESS_COLLECTION, collection.displayName);
-        } else {
-          context.sendTranslated(TLK_DEFAULT_CONFLICT, collectionName);
-        }
+        FindMe.inst().getFoundItems().removeCollection(collection.id);
+        context.sendTranslated(TLK_SUCCESS_COLLECTION, collection.displayName);
       }, () -> {
         context.sendTranslated(FMStrings.ERR_UNKNOWN_COLLECTION, collectionName);
       });

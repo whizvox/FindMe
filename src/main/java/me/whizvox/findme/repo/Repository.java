@@ -111,7 +111,7 @@ public abstract class Repository {
     args.add(pageable.limit());
     args.add(pageable.offset());
     List<R> items = fetchList(sql + " LIMIT ? OFFSET ?", args, fromRow);
-    return new Page<>(pageable.page(), count / pageable.limit(), count, items);
+    return new Page<>(pageable.page(), (int) Math.ceil((float) count / pageable.limit()), count, items);
   }
 
   protected int executeUpdate(String sql, @Nullable List<Object> args) {

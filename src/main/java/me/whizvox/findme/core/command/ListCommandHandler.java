@@ -46,7 +46,7 @@ public class ListCommandHandler extends CommandHandler {
   @Override
   public List<String> listSuggestions(CommandContext context) {
     if (context.argCount() == 2) {
-      return SuggestionHelper.pages(context.arg(1), FindMe.inst().getFindables().getTotalCount());
+      return SuggestionHelper.pages(context.arg(1), FindMe.inst().getFindables().getTotalCount(), 10);
     }
     return super.listSuggestions(context);
   }
@@ -67,20 +67,21 @@ public class ListCommandHandler extends CommandHandler {
         World world = Bukkit.getWorld(findable.uuid());
         if (world != null) {
           Block block = world.getBlockAt(findable.x(), findable.y(), findable.z());
-          context.sendTranslated(TLK_BLOCK, findable.id(), collectionName, block.getBlockData().getMaterial(), block.getWorld().getName(), block.getX(), block.getY(), block.getZ());
+          msg.addTranslated(TLK_BLOCK, findable.id(), collectionName, block.getBlockData().getMaterial(), block.getWorld().getName(), block.getX(), block.getY(), block.getZ());
         } else {
-          context.sendTranslated(TLK_UNKNOWN_BLOCK, findable.id(), collectionName, findable.uuid(), findable.x(), findable.y(), findable.z());
+          msg.addTranslated(TLK_UNKNOWN_BLOCK, findable.id(), collectionName, findable.uuid(), findable.x(), findable.y(), findable.z());
         }
       } else {
         Entity entity = Bukkit.getEntity(findable.uuid());
         if (entity != null) {
           Location loc = entity.getLocation();
-          context.sendTranslated(TLK_ENTITY, findable.id(), collectionName, entity.getType(), loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
+          msg.addTranslated(TLK_ENTITY, findable.id(), collectionName, entity.getType(), loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
         } else {
-          context.sendTranslated(TLK_UNKNOWN_ENTITY, findable.id(), collectionName, findable.uuid());
+          msg.addTranslated(TLK_UNKNOWN_ENTITY, findable.id(), collectionName, findable.uuid());
         }
       }
     });
+    context.sendMessage(msg);
   }
 
 }

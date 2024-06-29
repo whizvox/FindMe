@@ -13,6 +13,7 @@ public class RemoveCollectionCommandHandler extends CommandHandler {
   public static final String
       PERMISSION = "findme.remove.collection",
       TLK_DESCRIPTION = "remove.collection.description",
+      TLK_DEFAULT_CONFLICT = "remove.collection.defaultConflict",
       TLK_SUCCESS = "remove.collection.success";
 
   @Override
@@ -41,7 +42,12 @@ public class RemoveCollectionCommandHandler extends CommandHandler {
   @Override
   public void execute(CommandContext context) throws InterruptCommandException {
     FindableCollection collection = ArgumentHelper.getCollection(context, 1, false);
+    if (collection.id == FindMe.inst().getCollections().defaultCollection.id) {
+      context.sendTranslated(TLK_DEFAULT_CONFLICT);
+      return;
+    }
     FindMe.inst().getFoundItems().removeCollection(collection.id);
+    FindMe.inst().getFindables().removeByCollection(collection.id);
     FindMe.inst().getCollections().delete(collection.id);
     context.sendTranslated(TLK_SUCCESS, collection.displayName);
   }

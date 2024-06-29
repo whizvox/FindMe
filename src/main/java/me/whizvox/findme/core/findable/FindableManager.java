@@ -83,6 +83,11 @@ public class FindableManager {
     refresh();
   }
 
+  public void removeByCollection(int collectionId) {
+    repo.deleteByCollection(collectionId);
+    refresh();
+  }
+
   public void refresh() {
     blocks.clear();
     entities.clear();

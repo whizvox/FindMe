@@ -33,7 +33,7 @@ public class FMStrings {
     def.put(ERR_PLAYER_ONLY, "&cOnly a player can use this command");
     def.put(ERR_INTERRUPT, "&cSomething went wrong running this command. Check the logs for more info");
     def.put(ERR_COMMAND_NOT_FOUND, "&cCommand not found. Try running &e/%s help &cfor help");
-    def.put(ERR_INVALID_INT, "&cNot an integer: %d");
+    def.put(ERR_INVALID_INT, "&cNot an integer: %s");
     def.put(ERR_INT_OUT_OF_RANGE, "&cInvalid integer: %d. Must be between %d and %d");
     def.put(ERR_NO_BLOCK_FOUND, "&cNot looking at any blocks");
     def.put(ERR_NO_ENTITY_FOUND, "&cNot looking at any entities");
@@ -65,7 +65,7 @@ public class FMStrings {
     def.put(GetCommandHandler.TLK_SUCCESS, "&b[%1$s&r&b] &e%2$s&b: &r%3$s");
     def.put(ListCommandHandler.TLK_DESCRIPTION, "List all findables and where they are");
     def.put(ListCommandHandler.TLK_EMPTY, "&cThere is nothing to find...");
-    def.put(ListCommandHandler.TLK_HEADER, "&7=-= &bList of Findables (&e%$1d&b/&e%$2d&b) &7=-=");
+    def.put(ListCommandHandler.TLK_HEADER, "&7=-= &bList of Findables (&e%1$d&b/&e%2$d&b) &7=-=");
     def.put(ListCommandHandler.TLK_BLOCK, "- &b#%d&r (&e%s&r) %s in &e%s&r at &b%d&r,&b%d&r,&b%d");
     def.put(ListCommandHandler.TLK_UNKNOWN_BLOCK, "- &b#%d&r (&e%s&r) &4<unknown block> in &4%s%r at &b%d&r,&b%d&r,&b%d");
     def.put(ListCommandHandler.TLK_ENTITY, "- &b#%d&r (&e%s&r) %s in &e%s&r at &b%.1f&r,&b%.1f&r,&b%.1f");
@@ -74,6 +74,7 @@ public class FMStrings {
     def.put(RemoveBlockCommandHandler.TLK_UNKNOWN, "&cSelected block is not part of any collection");
     def.put(RemoveBlockCommandHandler.TLK_SUCCESS, "&aBlock removed from collection");
     def.put(RemoveCollectionCommandHandler.TLK_DESCRIPTION, "Remove a collection and its findables");
+    def.put(RemoveCollectionCommandHandler.TLK_DEFAULT_CONFLICT, "&cCannot remove the default collection");
     def.put(RemoveCollectionCommandHandler.TLK_SUCCESS, "&aRemoved collection %s");
     def.put(RemoveEntityCommandHandler.TLK_DESCRIPTION, "Remove a findable entity from its collection");
     def.put(RemoveEntityCommandHandler.TLK_NOT_FINDABLE, "&cSelected entity is not part of any collection");
@@ -81,7 +82,6 @@ public class FMStrings {
     def.put(RemoveFindableCommandHandler.TLK_DESCRIPTION, "Remove a findable from a collection");
     def.put(RemoveFindableCommandHandler.TLK_SUCCESS, "&aRemoved findable %s");
     def.put(RemovePlayerCommandHandler.TLK_DESCRIPTION, "Remove found items from a player's collection");
-    def.put(RemovePlayerCommandHandler.TLK_DEFAULT_CONFLICT, "&cCannot remove the default collection");
     def.put(RemovePlayerCommandHandler.TLK_SUCCESS_PLAYER, "&aRemoved all findables collected by %s");
     def.put(RemovePlayerCommandHandler.TLK_SUCCESS_COLLECTION, "&aRemoved all findables from player's collection");
     def.put(RemovePlayerCommandHandler.TLK_SUCCESS_FINDABLE, "&aRemoved player's findable");

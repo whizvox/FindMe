@@ -90,7 +90,7 @@ public class CollectionManager {
     }
     FindableCollection collection = byId.remove(collectionId);
     if (collection != null) {
-      byName.remove(collection.name);
+      byName.remove(collection.name.toLowerCase());
     }
     FindMe.inst().saveCollections();
   }

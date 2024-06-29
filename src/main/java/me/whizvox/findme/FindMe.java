@@ -7,6 +7,7 @@ import me.whizvox.findme.core.collection.CollectionManager;
 import me.whizvox.findme.core.findable.FindableManager;
 import me.whizvox.findme.core.founditem.FoundItemManager;
 import me.whizvox.findme.listener.PlayerListener;
+import org.bukkit.ChatColor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.IllegalFormatException;
 import java.util.logging.Level;
 
 public final class FindMe extends JavaPlugin {
@@ -58,7 +60,12 @@ public final class FindMe extends JavaPlugin {
   }
 
   public String translate(String key, Object... args) {
-    return l10n.translate(key).formatted(args);
+    String translated = translate(key);
+    try {
+      return translated.formatted(args);
+    } catch (IllegalFormatException e) {
+      return ChatColor.DARK_RED + "[!]" + ChatColor.RESET + translated;
+    }
   }
 
   private void loadOtherConfigurations() {
