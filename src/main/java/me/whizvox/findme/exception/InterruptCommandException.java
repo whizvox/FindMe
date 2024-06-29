@@ -1,29 +1,29 @@
 package me.whizvox.findme.exception;
 
-import me.whizvox.findme.FindMe;
+import me.whizvox.findme.command.ChatMessage;
 import me.whizvox.findme.core.FMStrings;
 
 public class InterruptCommandException extends RuntimeException {
 
-  public final String formattedMessage;
+  public final ChatMessage playerMessage;
   public final boolean showUsage;
 
-  public InterruptCommandException(String formattedMessage, boolean showUsage) {
+  public InterruptCommandException(ChatMessage message, boolean showUsage) {
     super("Please report this to the plugin developer if you see this message!");
-    this.formattedMessage = formattedMessage;
+    this.playerMessage = message;
     this.showUsage = showUsage;
   }
 
-  public boolean hasFormattedMessage() {
-    return formattedMessage != null;
+  public boolean hasPlayerMessage() {
+    return playerMessage != null;
   }
 
-  public static <T> T halt(String formattedMessage, boolean showUsage) {
-    throw new InterruptCommandException(formattedMessage, showUsage);
+  public static <T> T halt(ChatMessage message, boolean showUsage) {
+    throw new InterruptCommandException(message, showUsage);
   }
 
-  public static <T> T halt(String formattedMessage) {
-    return halt(formattedMessage, false);
+  public static <T> T halt(ChatMessage message) {
+    return halt(message, false);
   }
 
   public static <T> T showUsage() {
@@ -31,7 +31,7 @@ public class InterruptCommandException extends RuntimeException {
   }
 
   public static <T> T playerOnly() {
-    return halt(FindMe.inst().translate(FMStrings.ERROR_PLAYER_ONLY));
+    return halt(ChatMessage.translated(FMStrings.ERR_PLAYER_ONLY));
   }
 
 }

@@ -1,24 +1,28 @@
 package me.whizvox.findme.core.command;
 
 import me.whizvox.findme.FindMe;
-import me.whizvox.findme.command.ArgumentHelper;
-import me.whizvox.findme.command.CommandContext;
-import me.whizvox.findme.command.CommandHandler;
-import me.whizvox.findme.command.SuggestionHelper;
+import me.whizvox.findme.command.*;
 import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
-public class RemoveCollectionHandler extends CommandHandler {
+public class RemoveCollectionCommandHandler extends CommandHandler {
 
   public static final String
+      PERMISSION = "findme.remove.collection",
+      TLK_DESCRIPTION = "remove.collection.description",
       TLK_SUCCESS = "remove.collection.success";
 
   @Override
   public boolean hasPermission(CommandSender sender) {
-    return sender.hasPermission("findme.remove.collection");
+    return sender.hasPermission(PERMISSION);
+  }
+
+  @Override
+  public ChatMessage getDescription(CommandContext context) {
+    return ChatMessage.translated(TLK_DESCRIPTION);
   }
 
   @Override

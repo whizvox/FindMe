@@ -1,6 +1,7 @@
 package me.whizvox.findme.listener;
 
 import me.whizvox.findme.FindMe;
+import me.whizvox.findme.command.ChatMessage;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.findable.Findable;
 import me.whizvox.findme.util.FMUtils;
@@ -15,10 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class FindMePlayerListener implements Listener {
-
-  public static final String
-      TLK_ALREADY_FOUND = "error.alreadyFound";
+public class PlayerListener implements Listener {
 
   private static final Map<UUID, Long> COOLDOWNS = new HashMap<>();
 
@@ -35,7 +33,7 @@ public class FindMePlayerListener implements Listener {
     Findable<Block> findable = FindMe.inst().getFindables().getBlock(location);
     if (!findable.isEmpty()) {
       if (FindMe.inst().getFoundItems().hasBeenFound(player, findable.id())) {
-        player.sendMessage(FindMe.inst().translate(TLK_ALREADY_FOUND));
+        ChatMessage.sendTranslated(player, FMStrings.ERR_ALREADY_FOUND);
       } else {
         FindMe.inst().getCollections().getCollection(findable.collectionId()).ifPresentOrElse(collection -> {
           // TODO More advanced messaging
@@ -50,7 +48,7 @@ public class FindMePlayerListener implements Listener {
           player.sendMessage(FMUtils.format(collection.findMsg, args));
           player.playSound(player, collection.findSound, 1, 1);
         }, () -> {
-          player.sendMessage(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_COLLECTION, findable.collectionId()));
+          ChatMessage.sendTranslated(player, FMStrings.ERR_UNKNOWN_COLLECTION, findable.collectionId());
         });
       }
     }

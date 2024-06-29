@@ -1,10 +1,7 @@
 package me.whizvox.findme.core.command;
 
 import me.whizvox.findme.FindMe;
-import me.whizvox.findme.command.ArgumentHelper;
-import me.whizvox.findme.command.CommandContext;
-import me.whizvox.findme.command.CommandHandler;
-import me.whizvox.findme.command.SuggestionHelper;
+import me.whizvox.findme.command.*;
 import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.util.ChatUtils;
@@ -20,14 +17,21 @@ import java.util.stream.Collectors;
 public class SetCommandHandler extends CommandHandler {
 
   public static final String
-      TLK_UNKNOWN_SOUND = "findme.set.unknownSound",
-      TLK_SET = "findme.set.success",
-      TLK_CANNOT_UNSET = "findme.set.cannotUnset",
-      TLK_UNSET = "findme.set.unset";
+      PERMISSION = "findme.set",
+      TLK_DESCRIPTION = "set.description",
+      TLK_UNKNOWN_SOUND = "set.unknownSound",
+      TLK_SET = "set.success",
+      TLK_CANNOT_UNSET = "set.cannotUnset",
+      TLK_UNSET = "set.unset";
 
   @Override
   public boolean hasPermission(CommandSender sender) {
-    return sender.hasPermission("findme.set");
+    return sender.hasPermission(PERMISSION);
+  }
+
+  @Override
+  public ChatMessage getDescription(CommandContext context) {
+    return ChatMessage.translated(TLK_DESCRIPTION);
   }
 
   @Override
@@ -51,11 +55,11 @@ public class SetCommandHandler extends CommandHandler {
   @Override
   public void execute(CommandContext context) throws InterruptCommandException {
     FindableCollection collection = ArgumentHelper.getCollection(context, 1, false);
-    String property = ArgumentHelper.getLimitedString(context, 2, possibleFields);
+    String property = ArgumentHelper.getEnum(context, 2, possibleFields);
     boolean unset = context.argCount() == 3;
     if (unset) {
       if (property.equals("name")) {
-        InterruptCommandException.halt(FindMe.inst().translate(TLK_CANNOT_UNSET, property));
+        context.sendTranslated(TLK_CANNOT_UNSET, property);
         return;
       }
       if (property.equals("displayName")) {
@@ -63,7 +67,7 @@ public class SetCommandHandler extends CommandHandler {
       } else {
         collection.deserialize(Map.of(property, ""));
       }
-      context.sendMessage(FindMe.inst().translate(TLK_UNSET, property, collection.displayName));
+      context.sendTranslated(TLK_UNSET, property, collection.displayName);
     } else {
       String valueStr = ArgumentHelper.getString(context, 3);
       Object value;
@@ -72,14 +76,15 @@ public class SetCommandHandler extends CommandHandler {
       } else if (property.endsWith("Sound")) {
         value = Registry.SOUNDS.get(NamespacedKey.fromString(valueStr));
         if (value == null) {
-          InterruptCommandException.halt(FindMe.inst().translate(TLK_UNKNOWN_SOUND, valueStr));
+          context.sendTranslated(TLK_UNKNOWN_SOUND, valueStr);
+          return;
         }
       } else {
         value = valueStr;
       }
       collection.deserialize(Map.of(property, value));
       FindMe.inst().saveCollections();
-      context.sendMessage(FindMe.inst().translate(TLK_SET, property, value, collection.displayName));
+      context.sendTranslated(TLK_SET, property, value, collection.displayName);
     }
   }
 

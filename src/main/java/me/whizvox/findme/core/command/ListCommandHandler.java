@@ -1,11 +1,7 @@
 package me.whizvox.findme.core.command;
 
 import me.whizvox.findme.FindMe;
-import me.whizvox.findme.command.ArgumentHelper;
-import me.whizvox.findme.command.CommandContext;
-import me.whizvox.findme.command.CommandHandler;
-import me.whizvox.findme.command.SuggestionHelper;
-import me.whizvox.findme.core.FMStrings;
+import me.whizvox.findme.command.*;
 import me.whizvox.findme.core.findable.FindableDbo;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.repo.Page;
@@ -22,14 +18,24 @@ import java.util.List;
 
 public class ListCommandHandler extends CommandHandler {
 
+  public static final String
+      PERMISSION = "findme.list",
+      TLK_DESCRIPTION = "list.description",
+      TLK_EMPTY = "list.empty",
+      TLK_HEADER = "list.header",
+      TLK_BLOCK = "list.block",
+      TLK_ENTITY = "list.entity",
+      TLK_UNKNOWN_BLOCK = "list.unknownBlock",
+      TLK_UNKNOWN_ENTITY = "list.unknownEntity";
+
   @Override
   public boolean hasPermission(CommandSender sender) {
-    return sender.hasPermission("findme.list");
+    return sender.hasPermission(PERMISSION);
   }
 
   @Override
-  public String getDescription(CommandContext context) {
-    return FindMe.inst().translate(FMStrings.COMMAND_LIST_DESCRIPTION);
+  public ChatMessage getDescription(CommandContext context) {
+    return ChatMessage.translated(TLK_DESCRIPTION);
   }
 
   @Override
@@ -49,23 +55,29 @@ public class ListCommandHandler extends CommandHandler {
   public void execute(CommandContext context) throws InterruptCommandException {
     int pageNum = ArgumentHelper.getInt(context, 1, () -> 1, 1, Integer.MAX_VALUE);
     Page<FindableDbo> page = FindMe.inst().getFindables().getRepo().findAll(new Pageable(pageNum, 10));
+    if (page.totalItems() == 0) {
+      context.sendTranslated(TLK_EMPTY);
+      return;
+    }
+    ChatMessages msg = new ChatMessages();
+    msg.addTranslated(TLK_HEADER, pageNum, page.totalPages());
     page.items().forEach(findable -> {
       String collectionName = FindMe.inst().getCollections().getCollection(findable.collectionId()).map(col -> col.name).orElse(ChatColor.RED + "???");
       if (findable.isBlock()) {
         World world = Bukkit.getWorld(findable.uuid());
         if (world != null) {
           Block block = world.getBlockAt(findable.x(), findable.y(), findable.z());
-          context.sendMessage(FindMe.inst().translate(FMStrings.COMMAND_LIST_BLOCK, findable.id(), collectionName, block.getBlockData().getMaterial(), block.getWorld().getName(), block.getX(), block.getY(), block.getZ()));
+          context.sendTranslated(TLK_BLOCK, findable.id(), collectionName, block.getBlockData().getMaterial(), block.getWorld().getName(), block.getX(), block.getY(), block.getZ());
         } else {
-          context.sendMessage(FindMe.inst().translate(FMStrings.COMMAND_LIST_UNKNOWN_BLOCK, findable.id(), collectionName, findable.uuid(), findable.x(), findable.y(), findable.z()));
+          context.sendTranslated(TLK_UNKNOWN_BLOCK, findable.id(), collectionName, findable.uuid(), findable.x(), findable.y(), findable.z());
         }
       } else {
         Entity entity = Bukkit.getEntity(findable.uuid());
         if (entity != null) {
           Location loc = entity.getLocation();
-          context.sendMessage(FindMe.inst().translate(FMStrings.COMMAND_LIST_ENTITY, findable.id(), collectionName, entity.getType(), loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ()));
+          context.sendTranslated(TLK_ENTITY, findable.id(), collectionName, entity.getType(), loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
         } else {
-          context.sendMessage(FindMe.inst().translate(FMStrings.COMMAND_LIST_UNKNOWN_ENTITY, findable.id(), collectionName, findable.uuid()));
+          context.sendTranslated(TLK_UNKNOWN_ENTITY, findable.id(), collectionName, findable.uuid());
         }
       }
     });

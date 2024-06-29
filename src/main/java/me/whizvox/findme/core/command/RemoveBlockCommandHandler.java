@@ -1,11 +1,7 @@
 package me.whizvox.findme.core.command;
 
 import me.whizvox.findme.FindMe;
-import me.whizvox.findme.command.ArgumentHelper;
-import me.whizvox.findme.command.CommandContext;
-import me.whizvox.findme.command.CommandHandler;
-import me.whizvox.findme.command.SuggestionHelper;
-import me.whizvox.findme.core.FMStrings;
+import me.whizvox.findme.command.*;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.findable.Findable;
 import org.bukkit.Location;
@@ -16,14 +12,19 @@ import java.util.List;
 
 public class RemoveBlockCommandHandler extends CommandHandler {
 
+  public static final String
+      TLK_DESCRIPTION = "remove.block.description",
+      TLK_UNKNOWN = "remove.block.unknown",
+      TLK_SUCCESS = "remove.block.success";
+
   @Override
   public boolean hasPermission(CommandSender sender) {
-    return sender.hasPermission("findme.remove");
+    return sender.hasPermission(RemoveFindableCommandHandler.PERMISSION);
   }
 
   @Override
-  public String getDescription(CommandContext context) {
-    return FindMe.inst().translate(FMStrings.COMMAND_REMOVE_BLOCK_DESCRIPTION);
+  public ChatMessage getDescription(CommandContext context) {
+    return ChatMessage.translated(TLK_DESCRIPTION);
   }
 
   @Override
@@ -44,11 +45,12 @@ public class RemoveBlockCommandHandler extends CommandHandler {
     Location loc = ArgumentHelper.getBlockLocation(context, 1, true);
     Findable<Block> block = FindMe.inst().getFindables().getBlock(loc);
     if (block.isEmpty()) {
-      context.sendMessage(FindMe.inst().translate(FMStrings.COMMAND_REMOVE_BLOCK_NOT_FOUND));
+      context.sendTranslated(TLK_UNKNOWN);
       return;
     }
-    FindMe.inst().getFindables().getRepo().deleteById(block.id());
-    context.sendMessage(FindMe.inst().translate(FMStrings.COMMAND_REMOVE_BLOCK_SUCCESS));
+    FindMe.inst().getFoundItems().removeFindable(block.id());
+    FindMe.inst().getFindables().remove(block.id());
+    context.sendTranslated(TLK_SUCCESS);
   }
 
 }

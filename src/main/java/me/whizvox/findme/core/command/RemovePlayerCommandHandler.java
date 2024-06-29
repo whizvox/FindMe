@@ -1,10 +1,7 @@
 package me.whizvox.findme.core.command;
 
 import me.whizvox.findme.FindMe;
-import me.whizvox.findme.command.ArgumentHelper;
-import me.whizvox.findme.command.CommandContext;
-import me.whizvox.findme.command.CommandHandler;
-import me.whizvox.findme.command.SuggestionHelper;
+import me.whizvox.findme.command.*;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.exception.InterruptCommandException;
 import org.bukkit.OfflinePlayer;
@@ -15,14 +12,21 @@ import java.util.List;
 public class RemovePlayerCommandHandler extends CommandHandler {
 
   public static final String
-      TLK_SUCCESS_PLAYER = "remove.player.successAll",
+      PERMISSION = "findme.remove.player",
+      TLK_DESCRIPTION = "remove.player.description",
+      TLK_DEFAULT_CONFLICT = "remove.player.defaultConflict",
+      TLK_SUCCESS_PLAYER = "remove.player.successSingle",
       TLK_SUCCESS_COLLECTION = "remove.player.successCollection",
-      TLK_SUCCESS_FINDABLE = "remove.player.successFindable",
-      TLK_DEFAULT_CONFLICT = "remove.player.defaultConflict";
+      TLK_SUCCESS_FINDABLE = "remove.player.successFindable";
 
   @Override
   public boolean hasPermission(CommandSender sender) {
-    return sender.hasPermission("findme.remove.player");
+    return sender.hasPermission(PERMISSION);
+  }
+
+  @Override
+  public ChatMessage getDescription(CommandContext context) {
+    return ChatMessage.translated(TLK_DESCRIPTION);
   }
 
   @Override

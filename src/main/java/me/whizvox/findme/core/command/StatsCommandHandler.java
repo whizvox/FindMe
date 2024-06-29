@@ -13,13 +13,21 @@ import java.util.List;
 public class StatsCommandHandler extends CommandHandler {
 
   public static final String
+      PERMISSION = "findme.stats",
+      PERMISSION_OTHER = PERMISSION + ".other",
+      TLK_DESCRIPTION = "stats.description",
       TLK_HEADER = "stats.header",
       TLK_ENTRY = "stats.entry",
       TLK_NO_COLLECTIONS = "stats.noCollections";
 
   @Override
   public boolean hasPermission(CommandSender sender) {
-    return sender.hasPermission("findme.stats");
+    return sender.hasPermission(PERMISSION);
+  }
+
+  @Override
+  public ChatMessage getDescription(CommandContext context) {
+    return ChatMessage.translated(TLK_DESCRIPTION);
   }
 
   @Override
@@ -29,7 +37,7 @@ public class StatsCommandHandler extends CommandHandler {
 
   @Override
   public List<String> listSuggestions(CommandContext context) {
-    if (context.argCount() == 2 && context.sender().hasPermission("findme.stats.other")) {
+    if (context.argCount() == 2 && context.sender().hasPermission(PERMISSION_OTHER)) {
       return SuggestionHelper.offlinePlayers(context.arg(1));
     }
     return super.listSuggestions(context);
@@ -48,12 +56,12 @@ public class StatsCommandHandler extends CommandHandler {
     if (counts.isEmpty()) {
       context.sendTranslated(TLK_NO_COLLECTIONS);
     } else {
-      var msg = new TranslatedMessages();
-      msg.add(TLK_HEADER, player.getName());
+      ChatMessages msg = new ChatMessages();
+      msg.addTranslated(TLK_HEADER, player.getName());
       counts.stream()
           // sort by progress in descending order
           .sorted((o1, o2) -> Float.compare(o2.count, o1.count))
-          .forEach(count -> msg.add(TLK_ENTRY, count.collection.displayName, count.count, count.total, count.progress * 100));
+          .forEach(count -> msg.addTranslated(TLK_ENTRY, count.collection.displayName, count.count, count.total, count.progress * 100));
       context.sendMessage(msg);
     }
   }

@@ -11,8 +11,8 @@ public abstract class CommandHandler {
     return "";
   }
 
-  public String getDescription(CommandContext context) {
-    return "";
+  public ChatMessage getDescription(CommandContext context) {
+    return ChatMessage.EMPTY;
   }
 
   public List<String> listSuggestions(CommandContext context) {

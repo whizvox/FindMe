@@ -1,10 +1,6 @@
 package me.whizvox.findme.core.command;
 
-import me.whizvox.findme.FindMe;
-import me.whizvox.findme.command.ArgumentHelper;
-import me.whizvox.findme.command.CommandContext;
-import me.whizvox.findme.command.CommandHandler;
-import me.whizvox.findme.command.SuggestionHelper;
+import me.whizvox.findme.command.*;
 import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
 import org.bukkit.ChatColor;
@@ -17,11 +13,18 @@ import java.util.List;
 public class GetCommandHandler extends CommandHandler {
 
   public static final String
-        TLK_SUCCESS = "findme.get.success";
+        PERMISSION = "findme.get",
+        TLK_DESCRIPTION = "get.description",
+        TLK_SUCCESS = "get.success";
 
   @Override
   public boolean hasPermission(CommandSender sender) {
-    return sender.hasPermission("findme.get");
+    return sender.hasPermission(PERMISSION);
+  }
+
+  @Override
+  public ChatMessage getDescription(CommandContext context) {
+    return ChatMessage.translated(TLK_DESCRIPTION);
   }
 
   @Override
@@ -41,7 +44,7 @@ public class GetCommandHandler extends CommandHandler {
   @Override
   public void execute(CommandContext context) throws InterruptCommandException {
     FindableCollection collection = ArgumentHelper.getCollection(context, 1, false);
-    String property = ArgumentHelper.getLimitedString(context, 2, FindableCollection.FIELDS.keySet());
+    String property = ArgumentHelper.getEnum(context, 2, FindableCollection.FIELDS.keySet());
     Field field = FindableCollection.FIELDS.get(property);
     try {
       Object value = field.get(collection);
@@ -53,7 +56,7 @@ public class GetCommandHandler extends CommandHandler {
       } else {
         valueStr = String.valueOf(value);
       }
-      context.sendMessage(FindMe.inst().translate(TLK_SUCCESS, collection.displayName, property, valueStr));
+      context.sendTranslated(TLK_SUCCESS, collection.displayName, property, valueStr);
     } catch (IllegalAccessException e) {
       // something's gone horribly wrong
       throw new RuntimeException(e);

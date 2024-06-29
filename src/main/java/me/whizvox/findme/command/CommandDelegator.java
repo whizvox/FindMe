@@ -1,6 +1,5 @@
 package me.whizvox.findme.command;
 
-import me.whizvox.findme.FindMe;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.core.Reloadable;
 import me.whizvox.findme.exception.InterruptCommandException;
@@ -72,14 +71,14 @@ public class CommandDelegator implements CommandExecutor, TabCompleter, Reloadab
       if (handler.hasPermission(sender)) {
         handler.execute(context);
       } else {
-        sender.sendMessage(FindMe.inst().translate(FMStrings.ERROR_NO_PERMISSION));
+        context.sendTranslated(FMStrings.ERR_NO_PERMISSION);
       }
     } catch (InterruptCommandException e) {
-      if (e.hasFormattedMessage()) {
-        sender.sendMessage(e.formattedMessage);
+      if (e.hasPlayerMessage()) {
+        context.sendMessage(e.playerMessage);
       }
       if (e.showUsage) {
-        sender.sendMessage(FindMe.inst().translate(FMStrings.ERROR_USAGE, "/%s %s %s".formatted(label, subCommand, handler.getUsageArguments())));
+        context.sendTranslated(FMStrings.ERR_USAGE, "/%s %s %s".formatted(label, subCommand, handler.getUsageArguments()));
       }
     }
     return true;

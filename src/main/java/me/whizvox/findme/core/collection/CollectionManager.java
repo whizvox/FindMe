@@ -36,7 +36,7 @@ public class CollectionManager {
         FindMe.inst().getLogger().warning("Could not load collection from configuration file, duplicate ID or name: [" + collection.id + "] " + collection.name);
       }
     });
-    if (!byName.containsKey(defaultCollectionName)) {
+    if (!byName.containsKey(defaultCollectionName.toLowerCase())) {
       defaultCollection = create(defaultCollectionName, null);
     } else {
       defaultCollection = byName.get(defaultCollectionName);
@@ -67,7 +67,7 @@ public class CollectionManager {
     collection.id = id;
     collection.name = name;
     collection.displayName = name;
-    byName.put(collection.name, collection);
+    byName.put(collection.name.toLowerCase(), collection);
     byId.put(collection.id, collection);
     return collection;
   }

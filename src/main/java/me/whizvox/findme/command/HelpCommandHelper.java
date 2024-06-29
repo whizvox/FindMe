@@ -1,16 +1,18 @@
 package me.whizvox.findme.command;
 
-import me.whizvox.findme.FindMe;
-import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.repo.Pageable;
 import me.whizvox.findme.util.ChatUtils;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class HelpCommandHelper extends CommandHandler {
+
+  public static final String
+      TLK_DESCRIPTION = "help.description",
+      TLK_HEADER = "help.header",
+      TLK_ENTRY = "help.entry";
 
   private final CommandDelegator parent;
   private final String permission;
@@ -21,8 +23,8 @@ public class HelpCommandHelper extends CommandHandler {
   }
 
   @Override
-  public String getDescription(CommandContext context) {
-    return FindMe.inst().translate(FMStrings.COMMAND_HELP_DESCRIPTION, context.command().getName());
+  public ChatMessage getDescription(CommandContext context) {
+    return ChatMessage.translated(TLK_DESCRIPTION, context.command().getName());
   }
 
   @Override
@@ -53,13 +55,13 @@ public class HelpCommandHelper extends CommandHandler {
         .skip((pageNum - 1) * pageable.limit())
         .limit(10)
         .toList();
-    List<String> messages = new ArrayList<>();
-    messages.add(FindMe.inst().translate(FMStrings.COMMAND_HELP_HEADER, context.command().getName(), pageNum, (int) Math.ceil((double) parent.getHandlers().size() / pageable.limit())));
+    ChatMessages msg = new ChatMessages();
+    msg.addTranslated(TLK_HEADER, context.command().getName(), pageNum, (int) Math.ceil((double) parent.getHandlers().size() / pageable.limit()));
     commands.forEach(cmd -> {
       CommandHandler handler = parent.getHandler(cmd);
-      messages.add(FindMe.inst().translate(FMStrings.COMMAND_HELP_ENTRY, context.command().getName(), cmd, ChatUtils.colorUsage(handler.getUsageArguments()), handler.getDescription(context)));
+      msg.addTranslated(TLK_ENTRY, context.command().getName(), cmd, ChatUtils.colorUsage(handler.getUsageArguments()), handler.getDescription(context).getString());
     });
-    context.sendMessage(messages);
+    context.sendMessage(msg);
   }
 
 }

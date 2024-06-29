@@ -6,10 +6,7 @@ import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.findable.Findable;
 import me.whizvox.findme.util.FMUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 
@@ -17,6 +14,7 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class ArgumentHelper {
 
@@ -43,11 +41,11 @@ public class ArgumentHelper {
     try {
       int value = getArgument(context, index, defaultValue, Integer::parseInt);
       if (value < min || value > max) {
-        throw new InterruptCommandException(FindMe.inst().translate(FMStrings.ERROR_INT_OUT_OF_RANGE, value), false);
+        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INT_OUT_OF_RANGE, value));
       }
       return value;
     } catch (NumberFormatException e) {
-      throw new InterruptCommandException(FindMe.inst().translate(FMStrings.ERROR_INVALID_INT), false);
+      return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INVALID_INT));
     }
   }
 
@@ -55,26 +53,22 @@ public class ArgumentHelper {
     return getInt(context, index, InterruptCommandException::showUsage, min, max);
   }
 
-  public static String getLimitedString(CommandContext context, int index, Supplier<String> defaultValue, Collection<String> possibleValues) {
+  public static String getEnum(CommandContext context, int index, Supplier<String> defaultValue, Collection<String> possibleValues) {
     String str = getString(context, index, defaultValue);
     if (possibleValues.contains(str)) {
       return str;
     }
-    return InterruptCommandException.halt("Invalid argument, must be one of [" + String.join(", ", possibleValues) + "]");
+    return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INVALID_ENUM, possibleValues.stream().map(s -> ChatColor.RESET + s + ChatColor.RED).collect(Collectors.joining(", "))));
   }
 
-  public static String getLimitedString(CommandContext context, int index, Collection<String> possibleValues) {
-    String str = getString(context, index, InterruptCommandException::showUsage);
-    if (possibleValues.contains(str)) {
-      return str;
-    }
-    return InterruptCommandException.halt("Invalid argument, must be one of [" + String.join(", ", possibleValues) + "]");
+  public static String getEnum(CommandContext context, int index, Collection<String> possibleValues) {
+    return getEnum(context, index, InterruptCommandException::showUsage, possibleValues);
   }
 
   public static FindableCollection getCollection(CommandContext context, int index, Supplier<FindableCollection> defaultValue) {
     return getArgument(context, index,
         defaultValue,
-        name -> FindMe.inst().getCollections().getCollection(name).orElseGet(() -> InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_COLLECTION, name)))
+        name -> FindMe.inst().getCollections().getCollection(name).orElseGet(() -> InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_COLLECTION, name)))
     );
   }
 
@@ -90,11 +84,11 @@ public class ArgumentHelper {
         int id = Integer.parseInt(str);
         Findable<?> findable = FindMe.inst().getFindables().get(id);
         if (findable == null) {
-          return InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_FINDABLE, str));
+          return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_FINDABLE, str));
         }
         return findable;
       } catch (NumberFormatException e) {
-        return InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_FINDABLE, str));
+        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_FINDABLE, str));
       }
     });
   }
@@ -104,17 +98,15 @@ public class ArgumentHelper {
   }
 
   public static Entity getEntity(CommandContext context, int index, Supplier<Entity> defaultValue) {
-    return getArgument(context, index, defaultValue, arg -> {
+    return getArgument(context, index, defaultValue, value -> {
       try {
-        UUID entityId = UUID.fromString(arg);
+        UUID entityId = UUID.fromString(value);
         Entity entity = Bukkit.getEntity(entityId);
-        if (entity == null) {
-          return InterruptCommandException.halt("Unknown entity ID: " + arg);
+        if (entity != null) {
+          return entity;
         }
-        return entity;
-      } catch (IllegalArgumentException e) {
-        return InterruptCommandException.halt("Unknown entity ID: " + arg);
-      }
+      } catch (IllegalArgumentException ignored) {}
+      return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_ENTITY, value));
     });
   }
 
@@ -122,7 +114,7 @@ public class ArgumentHelper {
     return getEntity(context, index, () -> {
       Entity entity = FMUtils.getLookingAtEntity(context.getPlayer(), e -> true);
       if (entity == null) {
-        return InterruptCommandException.halt("No entity found");
+        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_NO_ENTITY_FOUND));
       }
       return entity;
     });
@@ -152,7 +144,7 @@ public class ArgumentHelper {
         world = Bukkit.getWorld(worldName);
       }
       if (world == null) {
-        context.sendMessage("Could not find world with name or ID " + worldName);
+        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_WORLD, worldName));
       }
     }
     return new Location(world, x, y, z);
@@ -165,7 +157,7 @@ public class ArgumentHelper {
       }
       Block block = FMUtils.getLookingAtBlock(context.getPlayer());
       if (block == null) {
-        return InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERROR_NO_BLOCK_FOUND));
+        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_NO_BLOCK_FOUND));
       }
       return block.getLocation();
     });
@@ -184,7 +176,7 @@ public class ArgumentHelper {
           return player;
         }
       }
-      return InterruptCommandException.halt(FindMe.inst().translate(FMStrings.ERR_UNKNOWN_PLAYER, str));
+      return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_PLAYER, str));
     });
   }
 
