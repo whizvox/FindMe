@@ -32,6 +32,9 @@ public class FindMeCommandDelegator extends CommandDelegator {
     register("removecollection", List.of("remc"), new RemoveCollectionCommandHandler());
     register("removefindable", List.of("remf"), new RemoveFindableCommandHandler());
     register("stats", List.of(), new StatsCommandHandler());
+    register("revert", List.of(), new RevertCommandHandler());
+    register("teleport", List.of("tp"), new TeleportCommandHandler());
+    register("info", List.of("i"), new InfoCommandHandler());
   }
 
   @Override

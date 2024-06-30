@@ -1,5 +1,6 @@
 package me.whizvox.findme.util;
 
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -24,6 +25,22 @@ public class FMUtils {
         entity -> entity != player && filter.test(entity)
     );
     return hit != null ? hit.getHitEntity() : null;
+  }
+
+  @Nullable
+  public static RayTraceResult getLookingAt(Player player, Predicate<Entity> entityFilter) {
+    Location pLoc = player.getEyeLocation();
+    RayTraceResult bHit = player.rayTraceBlocks(5.0);
+    RayTraceResult eHit = player.getWorld().rayTraceEntities(pLoc, pLoc.getDirection(), 5.0,
+        entity -> entity != player && entityFilter.test(entity)
+    );
+    if (bHit == null) {
+      return eHit;
+    } else if (eHit == null) {
+      return bHit;
+    }
+    return bHit.getHitPosition().distanceSquared(pLoc.toVector()) <
+        eHit.getHitPosition().distanceSquared(pLoc.toVector()) ? bHit : eHit;
   }
 
   public static String format(String str, Map<String, Object> args) {

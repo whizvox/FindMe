@@ -5,6 +5,7 @@ import me.whizvox.findme.command.ArgumentHelper;
 import me.whizvox.findme.command.ChatMessage;
 import me.whizvox.findme.command.CommandContext;
 import me.whizvox.findme.command.CommandHandler;
+import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.findable.Findable;
 import org.bukkit.command.CommandSender;
@@ -14,7 +15,6 @@ public class RemoveEntityCommandHandler extends CommandHandler {
 
   public static final String
       TLK_DESCRIPTION = "remove.entity.description",
-      TLK_NOT_FINDABLE = "remove.entity.notFindable",
       TLK_SUCCESS = "remove.entity.success";
 
   @Override
@@ -34,10 +34,10 @@ public class RemoveEntityCommandHandler extends CommandHandler {
 
   @Override
   public void execute(CommandContext context) throws InterruptCommandException {
-    Entity entity = ArgumentHelper.getEntity(context, 1);
+    Entity entity = ArgumentHelper.getEntity(context, 1, true);
     Findable<Entity> findable = FindMe.inst().getFindables().getEntity(entity);
     if (findable.isEmpty()) {
-      context.sendTranslated(TLK_NOT_FINDABLE);
+      context.sendTranslated(FMStrings.ERR_ENTITY_NOT_FINDABLE);
       return;
     }
     FindMe.inst().getFoundItems().removeFindable(findable.id());

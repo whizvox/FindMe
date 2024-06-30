@@ -2,6 +2,7 @@ package me.whizvox.findme.core.command;
 
 import me.whizvox.findme.FindMe;
 import me.whizvox.findme.command.*;
+import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.findable.Findable;
 import org.bukkit.Location;
@@ -14,7 +15,6 @@ public class RemoveBlockCommandHandler extends CommandHandler {
 
   public static final String
       TLK_DESCRIPTION = "remove.block.description",
-      TLK_UNKNOWN = "remove.block.unknown",
       TLK_SUCCESS = "remove.block.success";
 
   @Override
@@ -45,7 +45,7 @@ public class RemoveBlockCommandHandler extends CommandHandler {
     Location loc = ArgumentHelper.getBlockLocation(context, 1, true);
     Findable<Block> block = FindMe.inst().getFindables().getBlock(loc);
     if (block.isEmpty()) {
-      context.sendTranslated(TLK_UNKNOWN);
+      context.sendTranslated(FMStrings.ERR_BLOCK_NOT_FINDABLE);
       return;
     }
     FindMe.inst().getFoundItems().removeFindable(block.id());

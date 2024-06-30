@@ -7,8 +7,10 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.Connection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -76,6 +78,27 @@ public class FindableManager {
     byId.put(findable.id(), findableEntity);
     collectionCounts.put(collectionId, collectionCounts.getOrDefault(collectionId, 0) + 1);
     return findableEntity;
+  }
+
+  @Nullable
+  public Findable<?> getNearest(Location to) {
+    Location nearestBlock = blocks.keySet().stream()
+        .filter(loc -> loc.getWorld() != null && loc.getWorld() == to.getWorld())
+        .min(Comparator.comparingDouble(to::distanceSquared))
+        .orElse(null);
+    Findable<Entity> nearestEntity = entities.values().stream()
+        .filter(f -> f.object().getLocation().getWorld() != null && f.object().getLocation().getWorld() == to.getWorld())
+        .min(Comparator.comparingDouble(findable -> to.distanceSquared(findable.object().getLocation())))
+        .orElse(null);
+    if (nearestBlock == null) {
+      return nearestEntity;
+    } else if (nearestEntity == null) {
+      return blocks.get(nearestBlock);
+    }
+    if (to.distanceSquared(nearestBlock) < to.distanceSquared(nearestEntity.object().getLocation())) {
+      return blocks.get(nearestBlock);
+    }
+    return nearestEntity;
   }
 
   public void remove(int id) {

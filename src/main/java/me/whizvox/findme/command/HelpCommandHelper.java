@@ -59,7 +59,8 @@ public class HelpCommandHelper extends CommandHandler {
     msg.addTranslated(TLK_HEADER, context.command().getName(), pageNum, (int) Math.ceil((double) parent.getHandlers().size() / pageable.limit()));
     commands.forEach(cmd -> {
       CommandHandler handler = parent.getHandler(cmd);
-      msg.addTranslated(TLK_ENTRY, context.command().getName(), cmd, ChatUtils.colorUsage(handler.getUsageArguments()), handler.getDescription(context).getString());
+      String usage = ChatUtils.colorUsage(handler.getUsageArguments());
+      msg.addTranslated(TLK_ENTRY, context.command().getName(), cmd, usage.isEmpty() ? "" : " " + usage, handler.getDescription(context).getString());
     });
     context.sendMessage(msg);
   }

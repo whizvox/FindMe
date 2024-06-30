@@ -110,8 +110,11 @@ public class ArgumentHelper {
     });
   }
 
-  public static Entity getEntity(CommandContext context, int index) {
+  public static Entity getEntity(CommandContext context, int index, boolean lookingAtDefault) {
     return getEntity(context, index, () -> {
+      if (!lookingAtDefault) {
+        return InterruptCommandException.showUsage();
+      }
       Entity entity = FMUtils.getLookingAtEntity(context.getPlayer(), e -> true);
       if (entity == null) {
         return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_NO_ENTITY_FOUND));

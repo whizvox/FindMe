@@ -44,7 +44,7 @@ public class AddEntityCommandHandler extends CommandHandler {
   @Override
   public void execute(CommandContext context) throws InterruptCommandException {
     FindableCollection collection = ArgumentHelper.getCollection(context, 1, true);
-    Entity entity = ArgumentHelper.getEntity(context, 2);
+    Entity entity = ArgumentHelper.getEntity(context, 2, true);
     Findable<Entity> findable = FindMe.inst().getFindables().getEntity(entity);
     if (!findable.isEmpty()) {
       String conflictCollectionName = FindMe.inst().getCollections().getCollection(findable.collectionId())
