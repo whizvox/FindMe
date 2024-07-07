@@ -1,16 +1,20 @@
 package me.whizvox.findme;
 
+import me.whizvox.findme.core.FMConfig;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.core.FindMeCommandDelegator;
 import me.whizvox.findme.core.LocalizationManager;
 import me.whizvox.findme.core.collection.CollectionManager;
 import me.whizvox.findme.core.findable.FindableManager;
 import me.whizvox.findme.core.founditem.FoundItemManager;
+import me.whizvox.findme.listener.BlockListener;
+import me.whizvox.findme.listener.EntityListener;
 import me.whizvox.findme.listener.PlayerListener;
 import org.bukkit.ChatColor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -102,7 +106,11 @@ public final class FindMe extends JavaPlugin {
 
   public void reloadPlugin() {
     reloadConfig();
+    FMConfig.INST.load(getConfig());
+    saveConfig();
     loadOtherConfigurations();
+    findables.refresh();
+    foundItems.refresh();
   }
 
   public void saveCollections() {
@@ -133,6 +141,8 @@ public final class FindMe extends JavaPlugin {
     l10n = new LocalizationManager();
     stringsFile = new File(getDataFolder(), "strings.yml");
     collectionsFile = new File(getDataFolder(), "collections.yml");
+    FMConfig.INST.load(getConfig());
+    saveConfig();
     loadOtherConfigurations();
 
     FindMeCommandDelegator commandDelegator = new FindMeCommandDelegator();
@@ -140,7 +150,10 @@ public final class FindMe extends JavaPlugin {
     command.setExecutor(commandDelegator);
     command.setTabCompleter(commandDelegator);
 
-    getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+    PluginManager man = getServer().getPluginManager();
+    man.registerEvents(new PlayerListener(), this);
+    man.registerEvents(new BlockListener(), this);
+    man.registerEvents(new EntityListener(), this);
   }
 
   @Override

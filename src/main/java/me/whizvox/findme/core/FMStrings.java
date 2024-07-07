@@ -3,6 +3,7 @@ package me.whizvox.findme.core;
 import me.whizvox.findme.command.HelpCommandHelper;
 import me.whizvox.findme.command.ReloadCommandHandler;
 import me.whizvox.findme.core.command.*;
+import me.whizvox.findme.listener.BlockListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,8 @@ public class FMStrings {
       ERR_UNKNOWN_WORLD = "error.unknownWorld",
       ERR_UNKNOWN_ENTITY = "error.invalidEntity",
       ERR_INVALID_ENUM = "error.invalidEnum",
+      ERR_INVALID_BOOLEAN = "error.invalidBoolean",
+      ERR_INVALID_UUID = "error.invalidUUID",
       ERR_ALREADY_FOUND = "error.alreadyFound",
       ERR_BLOCK_NOT_FINDABLE = "error.blockNotFindable",
       ERR_ENTITY_NOT_FINDABLE = "error.entityNotFindable";
@@ -46,10 +49,13 @@ public class FMStrings {
     def.put(ERR_UNKNOWN_PLAYER, "&cUnknown player: %s");
     def.put(ERR_UNKNOWN_ENTITY, "&cUnknown entity ID: %s");
     def.put(ERR_INVALID_ENUM, "&cInvalid argument, must be one of [%s]");
+    def.put(ERR_INVALID_BOOLEAN, "&cInvalid boolean, must be true or false: %s");
+    def.put(ERR_INVALID_UUID, "&cInvalid UUID string: %s");
     def.put(ERR_ALREADY_FOUND, "&cYou've already found this!");
     def.put(ERR_BLOCK_NOT_FINDABLE, "&cThat block is not part of any collection");
     def.put(ERR_ENTITY_NOT_FINDABLE, "&cThat entity is not part of any collection");
     def.put(FindMeCommandDelegator.TLK_INFO, "&7=-= &bPlugin Information for &eFindMe &7=-=\n&aVersion: ???\n&aRun &b/findme help&a to view all commands\n&aFor more detailed information, check out the wiki: &ehttps://github.com/whizvox/FindMe/wiki");
+    def.put(BlockListener.TLK_CANNOT_BREAK, "&cCannot break that block");
     def.put(HelpCommandHelper.TLK_DESCRIPTION, "List all available sub-commands for &b/%s");
     def.put(HelpCommandHelper.TLK_HEADER, "&7=-= &bSub-Commands for &a/%1$s&b (&e%2$d&b/&e%3$d&b) &7=-=");
     def.put(HelpCommandHelper.TLK_ENTRY, "- &7/%1$s &b%2$s&r%3$s: %4$s");
@@ -73,6 +79,7 @@ public class FMStrings {
     def.put(InfoCommandHandler.TLK_BLOCK, "Type: &eBLOCK&r, ID: &b%1$d&r, Collection: &e%2$s&r, Location: &b%3$d&r,&b%4$d&r,&b%5$d &e%6$s");
     def.put(InfoCommandHandler.TLK_ENTITY, "Type: &eENTITY&r, ID: &b%1$d&r, Collection: &e%2$s&r, Location: &b%3$.1f&r,&b%4$.1f&r,&b%5$.1f &e%6$s&r, UUID: &b%7$s");
     def.put(ListCommandHandler.TLK_DESCRIPTION, "List all findables and where they are");
+    def.put(ListCommandHandler.TLK_BAD_RADIUS, "&cBad radius, must be a positive number: %s");
     def.put(ListCommandHandler.TLK_EMPTY, "&cThere is nothing to find...");
     def.put(ListCommandHandler.TLK_HEADER, "&7=-= &bList of Findables (&e%1$d&b/&e%2$d&b) &7=-=");
     def.put(ListCommandHandler.TLK_BLOCK, "- &b#%d&r (&e%s&r) %s in &e%s&r at &b%d&r,&b%d&r,&b%d");

@@ -2,6 +2,7 @@ package me.whizvox.findme.listener;
 
 import me.whizvox.findme.FindMe;
 import me.whizvox.findme.command.ChatMessage;
+import me.whizvox.findme.core.FMConfig;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.findable.Findable;
 import me.whizvox.findme.util.FMUtils;
@@ -37,16 +38,19 @@ public class PlayerListener implements Listener {
         return FindMe.inst().getCollections().getCollection(findable.collectionId()).map(collection -> {
           // TODO More advanced messaging
           FindMe.inst().getFoundItems().setFound(player, findable);
+          int count = FindMe.inst().getFoundItems().getFindCount(player, collection.id);
+          int total = FindMe.inst().getFindables().getCount(collection.id);
           Map<String, Object> args = Map.of(
               "p", player.getDisplayName(),
               "d", collection.displayName,
               "n", collection.name,
-              "c", FindMe.inst().getFoundItems().getFindCount(player, collection.id),
-              "t", FindMe.inst().getFindables().getCount(collection.id)
+              "c", count,
+              "t", total,
+              "e", String.format("%.1f", (float) count / total)
           );
           player.sendMessage(FMUtils.format(collection.findMsg, args));
           player.playSound(player, collection.findSound, 1, 1);
-          return FindMe.inst().getConfig().getBoolean("cancelEventOnFind", false);
+          return FMConfig.INST.shouldCancelEventOnFind();
         }).orElseGet(() -> {
           ChatMessage.sendTranslated(player, FMStrings.ERR_UNKNOWN_COLLECTION, findable.collectionId());
           return false;
