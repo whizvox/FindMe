@@ -57,7 +57,7 @@ public class InfoCommandHandler extends CommandHandler {
     Findable<?> findable;
     if (context.argCount() < 2) {
       Player player = context.getPlayer();
-      RayTraceResult hit = FMUtils.getLookingAt(player, e -> true);
+      RayTraceResult hit = FMUtils.getLookingAt(player);
       if (hit == null) {
         context.sendTranslated(FMStrings.ERR_NOT_LOOKING);
         return;
@@ -93,7 +93,7 @@ public class InfoCommandHandler extends CommandHandler {
           return;
         }
       } else {
-        findable = ArgumentHelper.getFindable(context, 1);
+        findable = ArgumentHelper.getFindable(context, 1, true);
       }
     }
     String collectionName = FindMe.inst().getCollections().getCollection(findable.collectionId())

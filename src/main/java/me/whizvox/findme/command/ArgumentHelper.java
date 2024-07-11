@@ -5,10 +5,12 @@ import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.findable.Findable;
+import me.whizvox.findme.findable.FindableType;
 import me.whizvox.findme.util.FMUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.util.RayTraceResult;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -38,15 +40,7 @@ public class ArgumentHelper {
   }
 
   public static int getInt(CommandContext context, int index, Supplier<Integer> defaultValue, int min, int max) {
-    try {
-      int value = getArgument(context, index, defaultValue, Integer::parseInt);
-      if (value < min || value > max) {
-        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INT_OUT_OF_RANGE, value, min, max));
-      }
-      return value;
-    } catch (NumberFormatException e) {
-      return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INVALID_INT, context.arg(index)));
-    }
+    return getArgument(context, index, defaultValue, str -> MetaArgumentHelper.parseInt(str, min, max));
   }
 
   public static int getInt(CommandContext context, int index, int min, int max) {
@@ -66,10 +60,7 @@ public class ArgumentHelper {
   }
 
   public static FindableCollection getCollection(CommandContext context, int index, Supplier<FindableCollection> defaultValue) {
-    return getArgument(context, index,
-        defaultValue,
-        name -> FindMe.inst().getCollections().getCollection(name).orElseGet(() -> InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_COLLECTION, name)))
-    );
+    return getArgument(context, index, defaultValue, MetaArgumentHelper::parseCollection);
   }
 
   public static FindableCollection getCollection(CommandContext context, int index, boolean defaultIfMissing) {
@@ -79,22 +70,31 @@ public class ArgumentHelper {
   }
 
   public static Findable<?> getFindable(CommandContext context, int index, Supplier<Findable<?>> defaultValue) {
-    return getArgument(context, index, defaultValue, str -> {
-      try {
-        int id = Integer.parseInt(str);
-        Findable<?> findable = FindMe.inst().getFindables().get(id);
-        if (findable == null) {
-          return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_FINDABLE, str));
-        }
-        return findable;
-      } catch (NumberFormatException e) {
-        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_FINDABLE, str));
-      }
-    });
+    return getArgument(context, index, defaultValue, MetaArgumentHelper::parseFindable);
   }
 
-  public static Findable<?> getFindable(CommandContext context, int index) {
-    return getFindable(context, index, InterruptCommandException::showUsage);
+  public static Findable<?> getFindable(CommandContext context, int index, boolean lookingAtDefault) {
+    return getFindable(context, index, () -> {
+      if (!lookingAtDefault) {
+        return InterruptCommandException.showUsage();
+      }
+      RayTraceResult hit = FMUtils.getLookingAt(context.getPlayer());
+      if (hit == null) {
+        return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_NOT_LOOKING));
+      }
+      Findable<?> findable;
+      if (hit.getHitEntity() != null) {
+        findable = FindMe.inst().getFindables().getEntity(hit.getHitEntity());
+      } else {
+        findable = FindMe.inst().getFindables().getBlock(hit.getHitBlock().getLocation());
+      }
+      if (findable.isEmpty()) {
+        return InterruptCommandException.halt(ChatMessage.translated(
+            findable.type() == FindableType.BLOCK ? FMStrings.ERR_BLOCK_NOT_FINDABLE : FMStrings.ERR_ENTITY_NOT_FINDABLE
+        ));
+      }
+      return findable;
+    });
   }
 
   public static Entity getEntity(CommandContext context, int index, Supplier<Entity> defaultValue) {
@@ -167,20 +167,7 @@ public class ArgumentHelper {
   }
 
   public static OfflinePlayer getOfflinePlayer(CommandContext context, int index, Supplier<OfflinePlayer> defaultValue) {
-    return getArgument(context, index, defaultValue, str -> {
-      if (str.length() == 36) {
-        try {
-          UUID id = UUID.fromString(str);
-          return Bukkit.getOfflinePlayer(id);
-        } catch (IllegalArgumentException ignored) {}
-      }
-      for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-        if (player.getName().equalsIgnoreCase(str)) {
-          return player;
-        }
-      }
-      return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_PLAYER, str));
-    });
+    return getArgument(context, index, defaultValue, MetaArgumentHelper::parseOfflinePlayer);
   }
 
   public static OfflinePlayer getOfflinePlayer(CommandContext context, int index) {

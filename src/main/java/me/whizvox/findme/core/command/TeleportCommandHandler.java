@@ -70,7 +70,7 @@ public class TeleportCommandHandler extends CommandHandler {
         return;
       }
     } else {
-      findable = ArgumentHelper.getFindable(context, 1);
+      findable = ArgumentHelper.getFindable(context, 1, false);
     }
     boolean forceIfUnsafe = ArgumentHelper.getEnum(context, 2, () -> "", List.of("force", "")).equals("force");
     Location loc = findable.type() == FindableType.BLOCK ?

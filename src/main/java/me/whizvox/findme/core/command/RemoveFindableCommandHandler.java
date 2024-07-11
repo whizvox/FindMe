@@ -33,7 +33,7 @@ public class RemoveFindableCommandHandler extends CommandHandler {
 
   @Override
   public void execute(CommandContext context) throws InterruptCommandException {
-    Findable<?> findable = ArgumentHelper.getFindable(context, 1);
+    Findable<?> findable = ArgumentHelper.getFindable(context, 1, true);
     FindMe.inst().getFoundItems().removeFindable(findable.id());
     FindMe.inst().getFindables().remove(findable.id());
     context.sendTranslated(TLK_SUCCESS, findable.id());

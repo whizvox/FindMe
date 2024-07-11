@@ -19,6 +19,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.Connection;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 
@@ -157,16 +158,19 @@ public class FindableManager {
     } else {
       sort = Comparator.comparingInt(Findable::id);
     }
-    long count = byId.values().parallelStream()
-        .filter(filter)
-        .count();
+    Predicate<Findable<?>> finalFilter = filter;
+    AtomicInteger countRef = new AtomicInteger(0);
     List<Findable<?>> items = byId.values().parallelStream()
-        .filter(filter)
+        .filter(findable -> {
+          countRef.addAndGet(1);
+          return finalFilter.test(findable);
+        })
         .sorted(sort)
         .skip((page - 1) * limit)
         .limit(limit)
         .toList();
-    return new Page<>(page, (int) Math.ceil((double) count / limit), (int) count, items);
+    int count = countRef.get();
+    return new Page<>(page, (int) Math.ceil((double) count / limit), count, items);
   }
 
   public Findable<Block> addBlock(int collectionId, Block block) {

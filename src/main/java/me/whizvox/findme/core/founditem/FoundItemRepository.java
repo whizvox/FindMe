@@ -8,6 +8,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +22,13 @@ public class FoundItemRepository extends Repository {
           "player CHAR(36) NOT NULL, " +
           "collection SMALLINT NOT NULL, " +
           "findable INT NOT NULL, " +
+          "when_found TIMESTAMP NOT NULL, " +
           "UNIQUE (player,findable)" +
       ")",
-      SQL_INSERT = "INSERT INTO found_items (player,collection,findable) VALUES (?,?,?)",
+      SQL_INSERT = "INSERT INTO found_items (player,collection,findable,when_found) VALUES (?,?,?,?)",
       SQL_SELECT_COUNT = "SELECT COUNT(*) FROM found_items",
       SQL_SELECT_PLAYER_COUNTS = "SELECT collection,COUNT(*) AS count FROM found_items WHERE player=? GROUP BY collection",
-      SQL_SELECT_ALL = "SELECT player,collection,findable FROM found_items",
+      SQL_SELECT_ALL = "SELECT player,collection,findable,when_found FROM found_items",
       SQL_SELECT_BY_PLAYER = SQL_SELECT_ALL + " WHERE player=?",
       SQL_SELECT_BY_COLLECTION = SQL_SELECT_ALL + " WHERE collection=?",
       SQL_SELECT_BY_FINDABLE = SQL_SELECT_ALL + " WHERE findable=?",
@@ -52,8 +55,8 @@ public class FoundItemRepository extends Repository {
     return SQL_SELECT_COUNT;
   }
 
-  public void insert(FoundItemDbo collection) {
-    executeUpdate(SQL_INSERT, List.of(collection.playerId(), collection.collectionId(), collection.findableId()));
+  public void insert(UUID playerId, int collectionId, int findableId) {
+    executeUpdate(SQL_INSERT, List.of(playerId, collectionId, findableId, Timestamp.valueOf(LocalDateTime.now())));
   }
 
   public List<FoundItemDbo> findAll() {
@@ -117,7 +120,8 @@ public class FoundItemRepository extends Repository {
   private static final SQLFunction<ResultSet, FoundItemDbo> FROM_ROW = rs -> new FoundItemDbo(
       UUID.fromString(rs.getString(1)),
       rs.getShort(2),
-      rs.getInt(3)
+      rs.getInt(3),
+      rs.getTimestamp(4).toLocalDateTime()
   );
 
 }

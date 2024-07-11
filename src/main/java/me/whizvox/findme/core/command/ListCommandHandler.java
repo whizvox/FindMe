@@ -110,7 +110,7 @@ public class ListCommandHandler extends CommandHandler {
           InterruptCommandException.halt(ChatMessage.translated(TLK_BAD_RADIUS, radiusStr));
         }
       } else if (arg.startsWith("v:")) {
-        boolean isValid = InterruptCommandException.parseBoolean(arg.substring(2));
+        boolean isValid = MetaArgumentHelper.parseBoolean(arg.substring(2));
         args.put("valid", isValid);
       } else if (arg.startsWith("p:")) {
         String pageStr = arg.substring(2);

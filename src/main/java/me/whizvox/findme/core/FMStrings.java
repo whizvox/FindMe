@@ -31,7 +31,12 @@ public class FMStrings {
       ERR_INVALID_UUID = "error.invalidUUID",
       ERR_ALREADY_FOUND = "error.alreadyFound",
       ERR_BLOCK_NOT_FINDABLE = "error.blockNotFindable",
-      ERR_ENTITY_NOT_FINDABLE = "error.entityNotFindable";
+      ERR_ENTITY_NOT_FINDABLE = "error.entityNotFindable",
+      ERR_INVALID_TIME = "error.invalidTime",
+      ENTRY_FINDABLE_BLOCK = "entry.findableBlock",
+      ENTRY_FINDABLE_ENTITY = "entry.findableEntity",
+      ENTRY_FINDABLE_UNKNOWN_BLOCK = "entry.findableUnknownBlock",
+      ENTRY_FINDABLE_UNKNOWN_ENTITY = "entry.findableUnknownEntity";
 
   public static Map<String, Object> getDefaults() {
     Map<String, Object> def = new HashMap<>();
@@ -54,6 +59,11 @@ public class FMStrings {
     def.put(ERR_ALREADY_FOUND, "&cYou've already found this!");
     def.put(ERR_BLOCK_NOT_FINDABLE, "&cThat block is not part of any collection");
     def.put(ERR_ENTITY_NOT_FINDABLE, "&cThat entity is not part of any collection");
+    def.put(ERR_INVALID_TIME, "&cInvalid time. Must be either a duration (i.e. 2h5m) or a timestamp (i.e. 2024-02-24)");
+    def.put(ENTRY_FINDABLE_BLOCK, "&b%1$s&r (&e%2$s&r): &eBLOCK&r (%3%s) in &e%4$s at &b%5$d&r,&b%6$d&r,&b%7$d");
+    def.put(ENTRY_FINDABLE_ENTITY, "&b%1$s&r (&e%2$s&r): &eENTITY&r (%3%s) in &e%4$s at &b%5$.1f&r,&b%6$.1f&r,&b%7$.1f");
+    def.put(ENTRY_FINDABLE_UNKNOWN_BLOCK, "&b%1$s&r (&e%2$s&r): &4UNKNOWN BLOCK&r at &b%4$d&r,&b%5$d&r,&b%6$d");
+    def.put(ENTRY_FINDABLE_UNKNOWN_ENTITY, "&b%1$s&r (&e%2$s&r): &4UNKNOWN ENTITY&r with ID &b%3$s");
     def.put(FindMeCommandDelegator.TLK_INFO, "&7=-= &bPlugin Information for &eFindMe &7=-=\n&aVersion: ???\n&aRun &b/findme help&a to view all commands\n&aFor more detailed information, check out the wiki: &ehttps://github.com/whizvox/FindMe/wiki");
     def.put(BlockListener.TLK_CANNOT_BREAK, "&cCannot break that block");
     def.put(HelpCommandHelper.TLK_DESCRIPTION, "List all available sub-commands for &b/%s");
@@ -75,6 +85,9 @@ public class FMStrings {
     def.put(CreateCommandHandler.TLK_SUCCESS, "&aCreated collection %s");
     def.put(GetCommandHandler.TLK_DESCRIPTION, "Get the value of a collection's property");
     def.put(GetCommandHandler.TLK_SUCCESS, "&b[%1$s&r&b] &e%2$s&b: &r%3$s");
+    def.put(HistoryCommandHandler.TLK_DESCRIPTION, "List the history of all found items");
+    def.put(HistoryCommandHandler.TLK_HEADER, "&7=-= &bHistory (&e%1$d&b/&e%2$d&b) &7=-=");
+    def.put(HistoryCommandHandler.TLK_ENTRY, "- &a%1$s&r: &b#%2$s&r (&e%3$s&r), %4$s");
     def.put(InfoCommandHandler.TLK_DESCRIPTION, "Get information about a findable");
     def.put(InfoCommandHandler.TLK_BLOCK, "Type: &eBLOCK&r, ID: &b%1$d&r, Collection: &e%2$s&r, Location: &b%3$d&r,&b%4$d&r,&b%5$d &e%6$s");
     def.put(InfoCommandHandler.TLK_ENTITY, "Type: &eENTITY&r, ID: &b%1$d&r, Collection: &e%2$s&r, Location: &b%3$.1f&r,&b%4$.1f&r,&b%5$.1f &e%6$s&r, UUID: &b%7$s");
