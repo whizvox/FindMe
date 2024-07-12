@@ -81,7 +81,14 @@ public class SetCommandHandler extends CommandHandler {
       String valueStr = ArgumentHelper.getString(context, 3);
       Object value;
       if (property.endsWith("Msg") || property.equals("displayName")) {
-        value = ChatUtils.colorString(valueStr);
+        StringBuilder fullValue = new StringBuilder();
+        for (int i = 3; i < context.argCount(); i++) {
+          if (!fullValue.isEmpty()) {
+            fullValue.append(' ');
+          }
+          fullValue.append(context.arg(i));
+        }
+        value = ChatUtils.colorString(fullValue.toString());
       } else if (property.endsWith("Sound")) {
         if (Registry.SOUNDS.get(NamespacedKey.fromString(valueStr)) == null) {
           context.sendTranslated(TLK_UNKNOWN_SOUND, valueStr);

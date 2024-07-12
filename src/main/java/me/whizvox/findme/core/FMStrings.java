@@ -64,7 +64,7 @@ public class FMStrings {
     def.put(ENTRY_FINDABLE_ENTITY, "&b%1$s&r (&e%2$s&r): &eENTITY&r (%3%s) in &e%4$s at &b%5$.1f&r,&b%6$.1f&r,&b%7$.1f");
     def.put(ENTRY_FINDABLE_UNKNOWN_BLOCK, "&b%1$s&r (&e%2$s&r): &4UNKNOWN BLOCK&r at &b%4$d&r,&b%5$d&r,&b%6$d");
     def.put(ENTRY_FINDABLE_UNKNOWN_ENTITY, "&b%1$s&r (&e%2$s&r): &4UNKNOWN ENTITY&r with ID &b%3$s");
-    def.put(FindMeCommandDelegator.TLK_INFO, "&7=-= &bPlugin Information for &eFindMe &7=-=\n&aVersion: ???\n&aRun &b/findme help&a to view all commands\n&aFor more detailed information, check out the wiki: &ehttps://github.com/whizvox/FindMe/wiki");
+    def.put(FindMeCommandDelegator.TLK_INFO, "&7=-= &bPlugin Information for &eFindMe &7=-=\n&aVersion: &4DEV VERSION\n&aRun &b/findme help&a to view all commands\n&aFor more detailed information, check out the wiki: &ehttps://github.com/whizvox/FindMe/wiki");
     def.put(BlockListener.TLK_CANNOT_BREAK, "&cCannot break that block");
     def.put(HelpCommandHelper.TLK_DESCRIPTION, "List all available sub-commands for &b/%s");
     def.put(HelpCommandHelper.TLK_HEADER, "&7=-= &bSub-Commands for &a/%1$s&b (&e%2$d&b/&e%3$d&b) &7=-=");

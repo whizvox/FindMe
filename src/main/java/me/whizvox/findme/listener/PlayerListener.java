@@ -6,6 +6,7 @@ import me.whizvox.findme.core.FMConfig;
 import me.whizvox.findme.core.FMStrings;
 import me.whizvox.findme.findable.Findable;
 import me.whizvox.findme.util.FMUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -48,8 +49,38 @@ public class PlayerListener implements Listener {
               "t", total,
               "e", String.format("%.1f", (float) count / total)
           );
-          player.sendMessage(FMUtils.format(collection.findMsg, args));
-          player.playSound(player, collection.findSound, 1, 1);
+          if (count == 1) {
+            if (!collection.findFirstMsg.isBlank()) {
+              player.sendMessage(FMUtils.format(collection.findFirstMsg, args));
+            }
+            if (collection.findFirstSound != null) {
+              player.playSound(player, collection.findFirstSound, 1, 1);
+            }
+          } else if (count >= FindMe.inst().getFindables().getCount(collection.id)) {
+            if (!collection.completeMsg.isBlank()) {
+              player.sendMessage(FMUtils.format(collection.completeMsg, args));
+            }
+            if (collection.completeSound != null) {
+              player.playSound(player, collection.completeSound, 1, 1);
+            }
+            if (!collection.completeBroadcastMsg.isBlank()) {
+              Bukkit.getOnlinePlayers().forEach(p -> {
+                if (!p.getUniqueId().equals(player.getUniqueId())) {
+                  p.sendMessage(FMUtils.format(collection.completeBroadcastMsg, args));
+                  if (collection.completeBroadcastSound != null) {
+                    p.playSound(player, collection.completeBroadcastSound, 1, 1);
+                  }
+                }
+              });
+            }
+          } else {
+            if (!collection.findMsg.isBlank()) {
+              player.sendMessage(FMUtils.format(collection.findMsg, args));
+            }
+            if (collection.findSound != null) {
+              player.playSound(player, collection.findSound, 1, 1);
+            }
+          }
           return FMConfig.INST.shouldCancelEventOnFind();
         }).orElseGet(() -> {
           ChatMessage.sendTranslated(player, FMStrings.ERR_UNKNOWN_COLLECTION, findable.collectionId());
