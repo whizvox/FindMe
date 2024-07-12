@@ -104,9 +104,9 @@ public class HistoryCommandHandler extends CommandHandler {
       String timestamp = FMUtils.formatDurationOrTimestamp(item.whenFound());
       String findableId;
       if (findable.isEmpty()) {
-        findableId = ChatColor.RED + "" + findable.id();
+        findableId = ChatColor.RED + "" + item.findableId();
       } else {
-        findableId = String.valueOf(findable.id());
+        findableId = String.valueOf(item.findableId());
       }
       msg.addTranslated(TLK_ENTRY, playerName, findableId, collectionName, timestamp);
     }

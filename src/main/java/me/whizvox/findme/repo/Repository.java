@@ -3,6 +3,7 @@ package me.whizvox.findme.repo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public abstract class Repository {
@@ -65,6 +66,8 @@ public abstract class Repository {
             stmt.setString(index, value.toString());
           } else if (arg instanceof SQLNull value) {
             stmt.setNull(index, value.sqlType());
+          } else if (arg instanceof LocalDateTime ldt) {
+            stmt.setTimestamp(index, Timestamp.valueOf(ldt));
           } else {
             stmt.setString(index, String.valueOf(arg));
           }

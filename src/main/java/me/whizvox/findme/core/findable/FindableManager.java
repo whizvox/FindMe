@@ -13,8 +13,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.sql.Connection;
@@ -58,7 +56,7 @@ public class FindableManager {
   }
 
   public Findable<?> get(int id) {
-    return byId.get(id);
+    return byId.getOrDefault(id, Findable.NULL_ENTITY);
   }
 
   public int getTotalCount() {
@@ -190,7 +188,8 @@ public class FindableManager {
     collectionCounts.put(collectionId, collectionCounts.getOrDefault(collectionId, 0) + 1);
     if (FMConfig.INST.shouldImmobilizeEntities()) {
       if (entity instanceof LivingEntity livEntity) {
-        livEntity.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, PotionEffect.INFINITE_DURATION, Short.MAX_VALUE, true, false));
+        livEntity.setCollidable(false);
+        livEntity.setAI(false);
         FindMe.inst().getLogger().info("Immobilized findable entity: " + entity.getUniqueId() + " (" + entity.getType() + ")");
       }
     }
@@ -222,10 +221,10 @@ public class FindableManager {
     if (!findable.isEmpty() && findable.type() == FindableType.ENTITY) {
       Entity entity = (Entity) findable.object();
       if (entity instanceof LivingEntity livEntity) {
-        boolean isImmobilized = livEntity.getActivePotionEffects().stream()
-            .anyMatch(effect -> effect.isInfinite() && effect.getType() == PotionEffectType.SLOW);
+        boolean isImmobilized = !livEntity.hasAI() && !livEntity.isCollidable();
         if (isImmobilized) {
-          livEntity.removePotionEffect(PotionEffectType.SLOW);
+          livEntity.setAI(true);
+          livEntity.setCollidable(true);
           FindMe.inst().getLogger().info("Removed immobilization from previous findable entity: " + entity.getUniqueId() + " (" + entity.getType() + ")");
         }
       }

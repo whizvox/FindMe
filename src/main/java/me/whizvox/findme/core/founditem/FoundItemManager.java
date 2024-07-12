@@ -198,6 +198,7 @@ public class FoundItemManager {
     items.clear();
     collectionCounts.clear();
     anyoneCollected.clear();
+    props.clear();
     repo.findAll().forEach(item -> {
       setFound0(item.playerId(), item.collectionId(), item.findableId(), item.whenFound());
     });

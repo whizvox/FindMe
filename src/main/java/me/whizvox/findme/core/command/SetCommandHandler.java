@@ -7,8 +7,10 @@ import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.util.ChatUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
+import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +46,13 @@ public class SetCommandHandler extends CommandHandler {
     return switch (context.argCount()) {
       case 2 -> SuggestionHelper.collections(context.arg(1));
       case 3 -> SuggestionHelper.fromStream(FindableCollection.FIELDS.keySet().stream(), context.arg(2));
+      case 4 -> {
+        String prop = context.arg(2);
+        if (prop.endsWith("Sound")) {
+          yield SuggestionHelper.fromStream(Arrays.stream(Sound.values()).map(sound -> sound.getKey().toString()), context.arg(3));
+        }
+        yield super.listSuggestions(context);
+      }
       default -> super.listSuggestions(context);
     };
   }
@@ -74,10 +83,11 @@ public class SetCommandHandler extends CommandHandler {
       if (property.endsWith("Msg") || property.equals("displayName")) {
         value = ChatUtils.colorString(valueStr);
       } else if (property.endsWith("Sound")) {
-        value = Registry.SOUNDS.get(NamespacedKey.fromString(valueStr));
-        if (value == null) {
+        if (Registry.SOUNDS.get(NamespacedKey.fromString(valueStr)) == null) {
           context.sendTranslated(TLK_UNKNOWN_SOUND, valueStr);
           return;
+        } else {
+          value = valueStr;
         }
       } else {
         value = valueStr;

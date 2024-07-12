@@ -56,7 +56,7 @@ public class FoundItemRepository extends Repository {
   }
 
   public void insert(UUID playerId, int collectionId, int findableId) {
-    executeUpdate(SQL_INSERT, List.of(playerId, collectionId, findableId, Timestamp.valueOf(LocalDateTime.now())));
+    executeUpdate(SQL_INSERT, List.of(playerId, collectionId, findableId, LocalDateTime.now()));
   }
 
   public List<FoundItemDbo> findAll() {

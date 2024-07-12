@@ -130,13 +130,13 @@ public final class FindableCollection {
       } else if (Boolean.class.isAssignableFrom(type)) {
         readBoolean(data, key, value -> setField(field, value));
       } else if (String.class.isAssignableFrom(type)) {
-        if (name.endsWith("Msg") || key.equals("displayName")) {
+        if (key.endsWith("Msg") || key.equals("displayName")) {
           readFormattedText(data, key, value -> setField(field, value));
-        } else if (key.endsWith("Sound")) {
-          readSound(data, key, value -> setField(field, value));
         } else {
           readString(data, key, value -> setField(field, value));
         }
+      } else if (Sound.class.isAssignableFrom(type)) {
+        readSound(data, key, value -> setField(field, value));
       }
     });
   }
