@@ -49,8 +49,6 @@ public abstract class Repository {
   }
 
   private <R> R executePrepared(String sql, @Nullable List<Object> args, SQLFunction<PreparedStatement, R> consumer) {
-    // FIXME Debug
-    //FindMe.inst().getLogger().info("SQL: " + sql + ", ARGS: " + args);
     return handle(() -> {
       try (PreparedStatement stmt = conn.prepareStatement(sql)) {
         List<Object> actualArgs = Objects.requireNonNullElse(args, List.of());

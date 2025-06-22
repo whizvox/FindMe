@@ -45,21 +45,14 @@ public class HistoryCommandHandler extends CommandHandler {
             "player:", "collection:", "findable:", "whenAfter:", "whenBefore:", "sort:", "order:", "page:", "world:"}), arg);
       } else {
         String selector = arg.substring(0, indexOf);
-        if (selector.equals("player") || selector.equals("r")) {
-          return SuggestionHelper.fromStream(Arrays.stream(Bukkit.getOfflinePlayers()).map(p -> selector + ":" + p.getName()), arg);
-        }
-        if (selector.equals("collection") || selector.equals("c")) {
-          return SuggestionHelper.fromStream(FindMe.inst().getCollections().stream().map(c -> selector + ":" + c.name), arg);
-        }
-        if (selector.equals("sort") || selector.equals("s")) {
-          return SuggestionHelper.fromStream(Arrays.stream(new String[]{"id", "when"}).map(s -> selector + ":" + s), arg);
-        }
-        if (selector.equals("order") || selector.equals("o")) {
-          return SuggestionHelper.fromStream(Arrays.stream(new String[]{"asc", "desc"}).map(s -> selector + ":" + s), arg);
-        }
-        if (selector.equals("world") || selector.equals("w")) {
-          return SuggestionHelper.fromStream(Bukkit.getWorlds().stream().map(w -> selector + ":" + w.getName()), arg);
-        }
+        return switch (selector) {
+          case "player", "u" -> SuggestionHelper.fromStream(Arrays.stream(Bukkit.getOfflinePlayers()).map(p -> selector + ":" + p.getName()), arg);
+          case "collection", "c" -> SuggestionHelper.fromStream(FindMe.inst().getCollections().stream().map(c -> selector + ":" + c.name), arg);
+          case "sort", "s" -> SuggestionHelper.fromStream(Arrays.stream(new String[] {"id", "when"}).map(s -> selector + ":" + s), arg);
+          case "order", "o" -> SuggestionHelper.fromStream(Arrays.stream(new String[] {"asc", "desc"}).map(s -> selector + ":" + s), arg);
+          case "world", "w" -> SuggestionHelper.fromStream(Bukkit.getWorlds().stream().map(w -> selector + ":" + w.getName()), arg);
+          default -> super.listSuggestions(context);
+        };
       }
     }
     return super.listSuggestions(context);
@@ -82,7 +75,7 @@ public class HistoryCommandHandler extends CommandHandler {
       String selector = arg.substring(0, indexOf);
       String value = arg.substring(indexOf + 1);
       switch (selector) {
-        case "player", "l" -> args.put("player", MetaArgumentHelper.parseOfflinePlayer(value).getUniqueId());
+        case "player", "u" -> args.put("player", MetaArgumentHelper.parseOfflinePlayer(value).getUniqueId());
         case "collection", "c" -> args.put("collection", MetaArgumentHelper.parseCollection(value).id);
         case "findable", "f" -> args.put("findable", MetaArgumentHelper.parseFindable(value).id());
         case "whenAfter", "a" -> args.put("whenAfter", MetaArgumentHelper.parseTimestamp(value));

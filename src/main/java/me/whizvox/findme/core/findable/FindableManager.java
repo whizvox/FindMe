@@ -5,8 +5,10 @@ import me.whizvox.findme.core.FMConfig;
 import me.whizvox.findme.findable.Findable;
 import me.whizvox.findme.findable.FindableType;
 import me.whizvox.findme.repo.Page;
+import me.whizvox.findme.util.FMUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -39,12 +41,60 @@ public class FindableManager {
     refresh();
   }
 
+  private Findable<?> validateCacheEntry(Findable<?> findable) {
+    if (!FMConfig.INST.shouldCheckCaches()) {
+      return findable;
+    }
+    int id = findable.id();
+    return repo.findById(findable.id())
+        .map(dbo -> {
+          if (!findable.isEmpty()) {
+            if ((findable.type() == FindableType.BLOCK) == dbo.isBlock()) {
+              if (findable.collectionId() == dbo.collectionId()) {
+                if (findable.type() == FindableType.BLOCK) {
+                  Location loc = ((Block) findable.object()).getLocation();
+                  if (loc.getBlockX() == dbo.x() && loc.getBlockY() == dbo.y() && loc.getBlockZ() == dbo.z() &&
+                      loc.getWorld() != null && loc.getWorld().getUID().equals(dbo.uuid())) {
+                    return findable;
+                  }
+                  FindMe.inst().getLogger().info(
+                      "Needed to refresh caches! Findable block (%d) is in wrong location. Found=%d,%d,%d,%s, Expected=%d,%d,%d,%s".formatted(
+                          id, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
+                          loc.getWorld() == null ? "null" : loc.getWorld().getUID(), dbo.x(), dbo.y(), dbo.z(),
+                          dbo.uuid())
+                  );
+                }
+                if (((Entity) findable.object()).getUniqueId().equals(dbo.uuid())) {
+                  return findable;
+                }
+                FindMe.inst().getLogger().info("Needed to refresh caches! Findable entity (%d) has mismatched UUIDs. Found=%s, Expected=%s".formatted(id, ((Entity) findable.object()).getUniqueId(), dbo.uuid()));
+              } else {
+                FindMe.inst().getLogger().info("Needed to refresh caches! Findable object (%d) is in wrong collection. Found=%d, Expected=%d".formatted(id, findable.collectionId(), dbo.collectionId()));
+              }
+            } else {
+              FindMe.inst().getLogger().info("Needed to refresh caches! Findable object (%d) has mismatched type. Found=%s, Expected=%s".formatted(id, findable.type(), dbo.isBlock() ? "BLOCK" : "ENTITY"));
+            }
+          } else {
+            FindMe.inst().getLogger().info("Needed to refresh caches! Findable object (%d) found in database, but not found in cache".formatted(id));
+          }
+          refresh();
+          return byId.getOrDefault(id, Findable.NULL_ENTITY);
+        }).orElseGet(() -> {
+          if (!findable.isEmpty()) {
+            FindMe.inst().getLogger().info("Needed to refresh caches! Findable object (%d) found in cache, but not found in database!".formatted(id));
+            refresh();
+          }
+          return Findable.NULL_ENTITY;
+        });
+  }
+
   public FindableRepository getRepo() {
     return repo;
   }
 
   public Findable<Block> getBlock(Location location) {
-    return blocks.getOrDefault(location, Findable.NULL_BLOCK);
+    //noinspection unchecked
+    return (Findable<Block>) validateCacheEntry(blocks.getOrDefault(location, Findable.NULL_BLOCK));
   }
 
   public Findable<Block> getBlock(World world, int x, int y, int z) {
@@ -52,11 +102,12 @@ public class FindableManager {
   }
 
   public Findable<Entity> getEntity(Entity entity) {
-    return entities.getOrDefault(entity.getUniqueId(), Findable.NULL_ENTITY);
+    //noinspection unchecked
+    return (Findable<Entity>) validateCacheEntry(entities.getOrDefault(entity.getUniqueId(), Findable.NULL_ENTITY));
   }
 
   public Findable<?> get(int id) {
-    return byId.getOrDefault(id, Findable.NULL_ENTITY);
+    return validateCacheEntry(byId.getOrDefault(id, Findable.NULL_ENTITY));
   }
 
   public int getTotalCount() {
@@ -105,18 +156,18 @@ public class FindableManager {
       }
     }
     if (args.containsKey("world")) {
-      UUID worldId = (UUID) args.get("world");
+      World world = (World) args.get("world");
       filter = filter.and(findable -> {
         if (findable.type() == FindableType.BLOCK) {
-          return ((Block) findable.object()).getLocation().getWorld().getUID().equals(worldId);
+          return ((Block) findable.object()).getLocation().getWorld().getUID().equals(world.getUID());
         } else {
-          return ((Entity) findable.object()).getLocation().getWorld().getUID().equals(worldId);
+          return ((Entity) findable.object()).getLocation().getWorld().getUID().equals(world.getUID());
         }
       });
     }
     if (args.containsKey("radius") && sender instanceof Player player) {
-      double radius = (double) args.get("radius");
-      double radiusSq = radius * radius;
+      int radius = (int) args.get("radius");
+      int radiusSq = radius * radius;
       Location center = player.getLocation();
       filter = filter.and(findable -> {
         if (findable.type() == FindableType.BLOCK) {
@@ -125,6 +176,14 @@ public class FindableManager {
           return ((Entity) findable.object()).getLocation().distanceSquared(center) <= radiusSq;
         }
       });
+    }
+    if (args.containsKey("found")) {
+      OfflinePlayer player = (OfflinePlayer) args.get("found");
+      filter = filter.and(findable -> FindMe.inst().getFoundItems().hasBeenFound(player.getUniqueId(), findable.id()));
+    }
+    if (args.containsKey("notFound")) {
+      OfflinePlayer player = (OfflinePlayer) args.get("notFound");
+      filter = filter.and(findable -> !FindMe.inst().getFoundItems().hasBeenFound(player.getUniqueId(), findable.id()));
     }
     if (args.containsKey("valid")) {
       boolean valid = (boolean) args.get("valid");
@@ -146,22 +205,36 @@ public class FindableManager {
       limit = (int) args.get("limit");
     }
     Comparator<Findable<?>> sort;
-    if (sender instanceof Player player) {
-      Location center = player.getLocation();
-      sort = (o1, o2) -> {
-        Location loc1 = o1.type() == FindableType.BLOCK ? ((Block) o1.object()).getLocation().clone().add(0.5, 0.5, 0.5) : ((Entity) o1.object()).getLocation();
-        Location loc2 = o2.type() == FindableType.BLOCK ? ((Block) o2.object()).getLocation().clone().add(0.5, 0.5, 0.5) : ((Entity) o2.object()).getLocation();
-        return Double.compare(loc1.distanceSquared(center), loc2.distanceSquared(center));
-      };
+    if (args.containsKey("order")) {
+      String order = (String) args.get("order");
+      if (order.equals("nearest") && sender instanceof Player player) {
+        sort = FMUtils.compareDistance(player.getLocation(), findable -> findable);
+      } else {
+        sort = Comparator.comparingInt(Findable::id);
+      }
     } else {
-      sort = Comparator.comparingInt(Findable::id);
+      if (sender instanceof Player player) {
+        Location center = player.getLocation();
+        sort = FMUtils.compareDistance(center, findable -> findable);
+      } else {
+        sort = Comparator.comparingInt(Findable::id);
+      }
+    }
+    if (args.containsKey("sort")) {
+      boolean asc = args.get("sort").equals("asc");
+      if (asc) {
+        sort = sort.reversed();
+      }
     }
     Predicate<Findable<?>> finalFilter = filter;
     AtomicInteger countRef = new AtomicInteger(0);
     List<Findable<?>> items = byId.values().parallelStream()
         .filter(findable -> {
-          countRef.addAndGet(1);
-          return finalFilter.test(findable);
+          if (finalFilter.test(findable)) {
+            countRef.addAndGet(1);
+            return true;
+          }
+          return false;
         })
         .sorted(sort)
         .skip((page - 1) * limit)

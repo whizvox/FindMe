@@ -48,6 +48,10 @@ public class FoundItemManager {
     return items.contains(Key.of(player, findableId));
   }
 
+  public boolean hasBeenFound(UUID playerId, int findableId) {
+    return items.contains(new Key(playerId, findableId));
+  }
+
   public boolean hasAnyoneCollected(int collectionId) {
     return anyoneCollected.contains(collectionId);
   }
@@ -153,8 +157,11 @@ public class FoundItemManager {
     List<FoundItemDbo> items = props.entrySet().stream()
         .map(entry -> new FoundItemDbo(entry.getKey().playerId(), entry.getValue().collectionId, entry.getKey().findableId, entry.getValue().whenFound()))
         .filter(item -> {
-          countRef.addAndGet(1);
-          return finalFilter.test(item);
+          if (finalFilter.test(item)) {
+            countRef.addAndGet(1);
+            return true;
+          }
+          return false;
         })
         .sorted(asc ? sort : sort.reversed())
         .skip((page - 1) * limit)

@@ -2,8 +2,6 @@ package me.whizvox.findme.core.command;
 
 import me.whizvox.findme.FindMe;
 import me.whizvox.findme.command.*;
-import me.whizvox.findme.core.FMStrings;
-import me.whizvox.findme.core.collection.FindableCollection;
 import me.whizvox.findme.exception.InterruptCommandException;
 import me.whizvox.findme.findable.Findable;
 import me.whizvox.findme.findable.FindableType;
@@ -11,7 +9,6 @@ import me.whizvox.findme.repo.Page;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -46,27 +43,28 @@ public class ListCommandHandler extends CommandHandler {
 
   @Override
   public String getUsageArguments() {
-    return "[c|b|e|i|w|r|v|p:<value>...]";
+    return "[collection|type|world|radius|valid|page|sort|found|notfound|order|sort:<value>...]";
   }
 
   @Override
   public List<String> listSuggestions(CommandContext context) {
     if (context.argCount() > 1) {
-      String lastArg = context.arg(context.argCount() - 1);
-      if (lastArg.length() < 2) {
-        return SuggestionHelper.fromStream(Arrays.stream(new String[] {"c:", "t:", "w:", "r:", "v:", "p:"}), lastArg);
-      }
-      if (lastArg.startsWith("c:")) {
-        return SuggestionHelper.fromStream(FindMe.inst().getCollections().stream().map(col -> "c:" + col.name), lastArg);
-      }
-      if (lastArg.startsWith("t:")) {
-        return SuggestionHelper.fromStream(Arrays.stream(new String[] {"t:block", "t:entity"}), lastArg);
-      }
-      if (lastArg.startsWith("w:")) {
-        return SuggestionHelper.fromStream(Bukkit.getWorlds().stream().map(world -> "w:" + world.getName()), lastArg);
-      }
-      if (lastArg.startsWith("v:")) {
-        return SuggestionHelper.fromStream(Arrays.stream(new String[]{"v:false", "v:true"}), lastArg);
+      String arg = context.arg(context.argCount() - 1);
+      int index = arg.indexOf(':');
+      if (index == -1) {
+        return SuggestionHelper.fromStream(Arrays.stream(new String[] {"collection:", "type:", "world:", "radius:", "valid:", "page:", "sort:", "found:", "notfound:", "order:"}), arg);
+      } else {
+        String selector = arg.substring(0, index);
+        return switch (selector) {
+          case "collection", "c" -> SuggestionHelper.fromStream(FindMe.inst().getCollections().stream().map(c -> selector + ":" + c.name), arg);
+          case "type", "t" -> SuggestionHelper.fromStream(Arrays.stream(new String[] {selector + ":block", selector + ":entity"}), arg);
+          case "world", "w" -> SuggestionHelper.fromStream(Bukkit.getWorlds().stream().map(world -> selector + ":" + world.getName()), arg);
+          case "valid", "v" -> SuggestionHelper.fromStream(Arrays.stream(new String[] {selector + ":false", selector + ":true"}), arg);
+          case "sort", "s" -> SuggestionHelper.fromStream(Arrays.stream(new String[] {selector + ":asc", selector + ":desc"}), arg);
+          case "found", "f", "notfound", "n" -> SuggestionHelper.fromStream(Arrays.stream(Bukkit.getOfflinePlayers()).map(p -> selector + ":" + p.getName()), arg);
+          case "order", "o" -> SuggestionHelper.fromStream(Arrays.stream(new String[] {selector + ":id", selector + ":nearest"}), arg);
+          default -> super.listSuggestions(context);
+        };
       }
     }
     return super.listSuggestions(context);
@@ -77,53 +75,23 @@ public class ListCommandHandler extends CommandHandler {
     Map<String, Object> args = new HashMap<>();
     for (int i = 1; i < context.argCount(); i++) {
       String arg = context.arg(i);
-      if (arg.startsWith("c:")) {
-        String colName = arg.substring(2);
-        FindableCollection collection = FindMe.inst().getCollections().getCollection(colName)
-            .orElseGet(() -> InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_COLLECTION, colName)));
-        args.put("collection", collection.id);
-      } else if (arg.startsWith("t:")) {
-        String type = arg.substring(2);
-        if (type.equals("block") || type.equals("entity")) {
-          args.put("type", type);
-        } else {
-          InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INVALID_ENUM, String.join(", ", "block", "entity")));
-        }
-      } else if (arg.startsWith("w")) {
-        String worldName = arg.substring(2);
-        World world = Bukkit.getWorld(worldName);
-        if (world == null) {
-          InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_WORLD, worldName));
-        } else {
-          args.put("world", world.getUID());
-        }
-      } else if (arg.startsWith("r:")) {
-        String radiusStr = arg.substring(2);
-        try {
-          double radius = Double.parseDouble(radiusStr);
-          if (radius < 0) {
-            InterruptCommandException.halt(ChatMessage.translated(TLK_BAD_RADIUS, radiusStr));
-          } else {
-            args.put("radius", radius);
-          }
-        } catch (NumberFormatException e) {
-          InterruptCommandException.halt(ChatMessage.translated(TLK_BAD_RADIUS, radiusStr));
-        }
-      } else if (arg.startsWith("v:")) {
-        boolean isValid = MetaArgumentHelper.parseBoolean(arg.substring(2));
-        args.put("valid", isValid);
-      } else if (arg.startsWith("p:")) {
-        String pageStr = arg.substring(2);
-        try {
-          int page = Integer.parseInt(pageStr);
-          if (page <= 0) {
-            InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INT_OUT_OF_RANGE, pageStr, 1, Integer.MAX_VALUE));
-          } else {
-            args.put("page", page);
-          }
-        } catch (NumberFormatException e) {
-          InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_INVALID_INT, pageStr));
-        }
+      int indexOf = arg.indexOf(':');
+      if (indexOf < 0) {
+        InterruptCommandException.showUsage();
+      }
+      String selector = arg.substring(0, indexOf);
+      String value = arg.substring(indexOf + 1);
+      switch (selector) {
+        case "c", "collection" -> args.put("collection", MetaArgumentHelper.parseCollection(value));
+        case "t", "type" -> args.put("type", MetaArgumentHelper.checkEnum(value, List.of("block", "entity")));
+        case "w", "world" -> args.put("world", MetaArgumentHelper.parseWorld(value));
+        case "r", "radius" -> args.put("radius", MetaArgumentHelper.parseInt(value, 1));
+        case "v", "valid" -> args.put("valid", MetaArgumentHelper.parseBoolean(value));
+        case "p", "page" -> args.put("page", MetaArgumentHelper.parseInt(value, 1));
+        case "o", "order" -> args.put("order", MetaArgumentHelper.checkEnum(value, List.of("id", "nearest")));
+        case "s", "sort" -> args.put("sort", MetaArgumentHelper.checkEnum(value, List.of("asc", "desc")));
+        case "f", "found" -> args.put("found", MetaArgumentHelper.parseOfflinePlayer(value));
+        case "n", "notfound" -> args.put("notFound", MetaArgumentHelper.parseOfflinePlayer(value));
       }
     }
     Page<Findable<?>> page = FindMe.inst().getFindables().search(context.sender(), args);

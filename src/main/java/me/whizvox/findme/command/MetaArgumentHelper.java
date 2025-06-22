@@ -55,7 +55,7 @@ public class MetaArgumentHelper {
     try {
       int id = Integer.parseInt(str);
       Findable<?> findable = FindMe.inst().getFindables().get(id);
-      if (findable == null) {
+      if (findable == null || findable.isEmpty()) {
         return InterruptCommandException.halt(ChatMessage.translated(FMStrings.ERR_UNKNOWN_FINDABLE, str));
       }
       return findable;
